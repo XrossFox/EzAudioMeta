@@ -3,7 +3,7 @@ from pathlib import Path
 
 import mutagen
 
-from ezaudiometa.modules import base_audio
+from audio import base_audio
 
 
 class TestBaseAudio(TestCase):
@@ -11,6 +11,7 @@ class TestBaseAudio(TestCase):
     def setUp(self) -> None:
         self.current_directory = str(Path(__file__).parent.absolute())
         self.path_to_test_files = str(self.current_directory) + "\\test_files"
+        self.reset_default_tags()
 
     def test_load_track(self) -> None:
         '''
@@ -162,6 +163,37 @@ class TestBaseAudio(TestCase):
         ba_audio.set_tag("tracknumber", 1)
         ba_audio.set_tag("title",
                          "Let Go of Time (and Time Will Let Go of You)")
+
+    def test_set_tags(self) -> None:
+        '''
+        When attempting to set multiple tags:
+        1. Pass a dictionary with the tags as keys, and values as the
+        tag values to be setted.
+        2. All tags should be setted.
+        '''
+        audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
+        ba_audio = base_audio.BaseAudio()
+        ba_audio.load_track(audio_file)
+
+        tags = {
+            "album": "dis is my album",
+            "albumartist": "my artist",
+            "comment": "hai domo",
+            "compilation": "something, i dunno",
+            "composer": "Johan Switcheroo",
+            "discnumber": 1,
+            "genre": "Progressive Electro-Cumbia",
+            "lyrics": "OwO",
+            "totaldiscs": "2",
+            "totaltracks": 38,
+            "tracknumber": 5,
+            "tracktitle": "Perreo Intenso Progresivo: Parte I",
+            "year": "1999",
+            "isrc": "The hell is this",
+        }
+
+        ba_audio.set_tags(tags)
+
 
     def tearDown(self) -> None:
         self.reset_default_tags()
