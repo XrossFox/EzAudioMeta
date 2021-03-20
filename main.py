@@ -2,13 +2,12 @@ import click
 from audio import base_audio
 
 
-
 @click.command()
 @click.option('--file', type=str)
 @click.option('--album', type=str)
 @click.option('--albumartist', type=str)
 @click.option('--comment', type=str)
-@click.option('--compilation', type=str)
+@click.option('--compilation', type=int)
 @click.option('--composer', type=str)
 @click.option('--discnumber', type=str)
 @click.option('--genre', type=str)

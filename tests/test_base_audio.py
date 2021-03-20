@@ -1,3 +1,4 @@
+from typing import Type
 from unittest import TestCase
 from pathlib import Path
 
@@ -144,6 +145,140 @@ class TestBaseAudio(TestCase):
         ba_audio.set_tag("albumartist", new_title)
         self.assertEqual(ba_audio.get_tag("albumartist"), new_title)
 
+    def test_set_tag_expected_str(self) -> None:
+        '''
+        When trying to set a tag that is expected to be a str as a different
+        type:
+        1. Pass a valid audio file.
+        2. Try to set title as an int.
+        3. TypeError exception expected.
+        '''
+        audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
+        ba_audio = base_audio.BaseAudio()
+        ba_audio.load_track(audio_file)
+        with self.assertRaises(TypeError):
+            ba_audio.set_tag('title', 15)
+
+    def test_set_tag_expected_int(self) -> None:
+        '''
+        When trying to set a tag that is expected to be an int as a different
+        type:
+        1. Pass a valid audio file.
+        2. Try to set tracknumber as a str.
+        3. TypeError exception expected.
+        '''
+        audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
+        ba_audio = base_audio.BaseAudio()
+        ba_audio.load_track(audio_file)
+        with self.assertRaises(TypeError):
+            ba_audio.set_tag('tracknumber', "15")
+
+    def test_set_tags(self) -> None:
+        '''
+        When attempting to set multiple tags:
+        1. Pass a dictionary with the tags as keys, and values as the
+        tag values to be setted.
+        2. All tags should be setted.
+        '''
+        audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
+        ba_audio = base_audio.BaseAudio()
+        ba_audio.load_track(audio_file)
+
+        tags = {
+            "album": "dis is my album",
+            "albumartist": "my artist",
+            "comment": "hai domo",
+            "compilation": 1,
+            "composer": "Johan Switcheroo",
+            "discnumber": 1,
+            "genre": "Progressive Electro-Cumbia",
+            "lyrics": "OwO",
+            "totaldiscs": 2,
+            "totaltracks": 38,
+            "tracknumber": 5,
+            "tracktitle": "Perreo Intenso Progresivo: Parte I",
+            "year": 1999,
+            "isrc": "The hell is this",
+        }
+
+        ba_audio.set_tags(**tags)
+        for key in tags:
+            self.assertEqual(ba_audio.get_tag(key), tags[key])
+
+    def test_set_tags_subset(self) -> None:
+        '''
+        When attempting to set multiple tags, but not all:
+        1. Pass a dictionary with the tags as keys, and values as the
+        tag values to be setted.
+        2. Subset tags should be setted.
+        '''
+        audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
+        ba_audio = base_audio.BaseAudio()
+        ba_audio.load_track(audio_file)
+
+        tags = {
+            "album": "dis is my album",
+            "albumartist": "my artist",
+            "comment": "hai domo",
+            "compilation": 1,
+            "tracktitle": "Perreo Intenso Progresivo: Parte I",
+            "year": 1999,
+            "isrc": "The hell is this",
+        }
+
+        ba_audio.set_tags(**tags)
+        for key in tags:
+            self.assertEqual(ba_audio.get_tag(key), tags[key])
+
+    def test_set_tags_subset_invalid_tag(self) -> None:
+        '''
+        When attempting to set multiple tags, but one is an invalid tag:
+        1. Pass a dictionary with the tags as keys, and values as the
+        tag values to be setted.
+        2. Subset tags should be setted.
+        3. KeyError exception expected.
+        '''
+        audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
+        ba_audio = base_audio.BaseAudio()
+        ba_audio.load_track(audio_file)
+
+        tags = {
+            "album": "dis is my album",
+            "albumartist": "my artist",
+            "commmmment": "hai domo",
+            "compilation": 1,
+            "tracktitle": "Perreo Intenso Progresivo: Parte I",
+            "year": 1999,
+            "isrc": "The hell is this",
+        }
+
+        with self.assertRaises(KeyError):
+            ba_audio.set_tags(**tags)
+            for key in tags:
+                self.assertEqual(ba_audio.get_tag(key), tags[key])
+
+    def test_set_tags_delegate_except_to_set_tag(self) -> None:
+        '''
+        When attempting to set tags of the wrong type, the exception handling
+        should be delegated to set_tag method.
+        1. Pass a dictionary with the tags as keys, and values as the
+        tag values to be setted.
+        2. Set an int tag as an str.
+        3. Set an int
+        '''
+        audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
+        ba_audio = base_audio.BaseAudio()
+        ba_audio.load_track(audio_file)
+
+        tags = {
+            "album": 16,
+        }
+
+        with self.assertRaises(TypeError):
+            ba_audio.set_tags(**tags)
+            for key in tags:
+                self.assertEqual(ba_audio.get_tag(key), tags[key])
+
     def reset_default_tags(self) -> None:
         audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
         ba_audio = base_audio.BaseAudio()
@@ -163,37 +298,6 @@ class TestBaseAudio(TestCase):
         ba_audio.set_tag("tracknumber", 1)
         ba_audio.set_tag("title",
                          "Let Go of Time (and Time Will Let Go of You)")
-
-    def test_set_tags(self) -> None:
-        '''
-        When attempting to set multiple tags:
-        1. Pass a dictionary with the tags as keys, and values as the
-        tag values to be setted.
-        2. All tags should be setted.
-        '''
-        audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
-        ba_audio = base_audio.BaseAudio()
-        ba_audio.load_track(audio_file)
-
-        tags = {
-            "album": "dis is my album",
-            "albumartist": "my artist",
-            "comment": "hai domo",
-            "compilation": "something, i dunno",
-            "composer": "Johan Switcheroo",
-            "discnumber": 1,
-            "genre": "Progressive Electro-Cumbia",
-            "lyrics": "OwO",
-            "totaldiscs": "2",
-            "totaltracks": 38,
-            "tracknumber": 5,
-            "tracktitle": "Perreo Intenso Progresivo: Parte I",
-            "year": "1999",
-            "isrc": "The hell is this",
-        }
-
-        ba_audio.set_tags(tags)
-
 
     def tearDown(self) -> None:
         self.reset_default_tags()
