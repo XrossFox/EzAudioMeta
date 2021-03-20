@@ -99,3 +99,9 @@ class BaseAudio:
         '''
         for key in kwargs_tags:
             self.set_tag(key, kwargs_tags[key])
+
+    def write_tags(self):
+        '''
+        Writes the actual tags to the file.
+        '''
+        self._current_file.save()

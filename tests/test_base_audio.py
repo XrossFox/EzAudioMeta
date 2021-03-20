@@ -1,4 +1,3 @@
-from typing import Type
 from unittest import TestCase
 from pathlib import Path
 
