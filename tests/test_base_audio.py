@@ -114,7 +114,11 @@ class TestBaseAudio(TestCase):
         ba_audio.load_track(audio_file)
         new_title = "new_title"
         ba_audio.set_tag("title", new_title)
-        self.assertEqual(ba_audio.get_tag("title"), new_title)
+        ba_audio.write_tags()
+
+        ba_audio_after_write = base_audio.BaseAudio()
+        ba_audio_after_write.load_track(audio_file)
+        self.assertEqual(ba_audio_after_write.get_tag("title"), new_title)
 
     def test_set_tag_invalid_tag(self) -> None:
         '''
@@ -127,7 +131,7 @@ class TestBaseAudio(TestCase):
             audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
             ba_audio = base_audio.BaseAudio()
             ba_audio.load_track(audio_file)
-            ba_audio.set_tag("Wolololo!", "this is invalid, my dude")
+            ba_audio.set_tag("Wolololo!", "this is invalid, my dude")    
 
     def test_set_tag_empty_tag(self) -> None:
         '''
@@ -142,7 +146,12 @@ class TestBaseAudio(TestCase):
         ba_audio.load_track(audio_file)
         new_title = "some album artist"
         ba_audio.set_tag("albumartist", new_title)
-        self.assertEqual(ba_audio.get_tag("albumartist"), new_title)
+        ba_audio.write_tags()
+
+        ba_audio_after_write = base_audio.BaseAudio()
+        ba_audio_after_write.load_track(audio_file)
+        self.assertEqual(ba_audio_after_write.get_tag("albumartist"),
+                         new_title)
 
     def test_set_tag_expected_str(self) -> None:
         '''
@@ -201,8 +210,12 @@ class TestBaseAudio(TestCase):
         }
 
         ba_audio.set_tags(**tags)
+        ba_audio.write_tags()
+
+        ba_audio_after_write = base_audio.BaseAudio()
+        ba_audio_after_write.load_track(audio_file)
         for key in tags:
-            self.assertEqual(ba_audio.get_tag(key), tags[key])
+            self.assertEqual(ba_audio_after_write.get_tag(key), tags[key])
 
     def test_set_tags_subset(self) -> None:
         '''
@@ -226,8 +239,12 @@ class TestBaseAudio(TestCase):
         }
 
         ba_audio.set_tags(**tags)
+        ba_audio.write_tags()
+
+        ba_audio_after_write = base_audio.BaseAudio()
+        ba_audio_after_write.load_track(audio_file)
         for key in tags:
-            self.assertEqual(ba_audio.get_tag(key), tags[key])
+            self.assertEqual(ba_audio_after_write.get_tag(key), tags[key])
 
     def test_set_tags_subset_invalid_tag(self) -> None:
         '''
@@ -284,10 +301,12 @@ class TestBaseAudio(TestCase):
         ba_audio.load_track(audio_file)
         ba_audio.set_tag("artist", "Dee Yan-Key")
         ba_audio.set_tag("album", "little night thoughts")
+        ba_audio.set_tag("albumartist", "")
         ba_audio.set_tag("genre", "electroswing")
         ba_audio.set_tag("year", 2019)
         ba_audio.set_tag("tracknumber", 1)
         ba_audio.set_tag("title", "gloomy sky")
+        ba_audio.write_tags()
 
         audio_file = self.path_to_test_files + "\\audio_file_2.mp3"
         ba_audio = base_audio.BaseAudio()
@@ -297,6 +316,7 @@ class TestBaseAudio(TestCase):
         ba_audio.set_tag("tracknumber", 1)
         ba_audio.set_tag("title",
                          "Let Go of Time (and Time Will Let Go of You)")
+        ba_audio.write_tags()
 
     def tearDown(self) -> None:
         self.reset_default_tags()
