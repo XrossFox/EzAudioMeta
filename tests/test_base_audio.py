@@ -131,7 +131,7 @@ class TestBaseAudio(TestCase):
             audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
             ba_audio = base_audio.BaseAudio()
             ba_audio.load_track(audio_file)
-            ba_audio.set_tag("Wolololo!", "this is invalid, my dude")    
+            ba_audio.set_tag("Wolololo!", "this is invalid, my dude")
 
     def test_set_tag_empty_tag(self) -> None:
         '''

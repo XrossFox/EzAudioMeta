@@ -11,6 +11,8 @@ class TestCli(unittest.TestCase):
     def setUp(self) -> None:
         self.current_directory = str(Path(__file__).parent.absolute())
         self.path_to_test_files = str(self.current_directory) + "\\test_files"
+
+    def tearDown(self) -> None:
         self.reset_default_tags()
 
     def test_run_cli_no_audio_file(self):
@@ -56,6 +58,53 @@ class TestCli(unittest.TestCase):
         ba_audio.load_track(audio_file)
         self.assertEqual(ba_audio.get_tag("tracktitle"), new_title)
 
+    def test_run_cli_set_tracktitle_and_album_and_genre(self):
+        '''
+        When attempting to tun the CLI and set tracktitle tag:
+        1. Pass a valid audio file.
+        2. set the 'tracktitle', 'album', and 'genre' tags.
+        3. check for changes.
+        '''
+        audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
+        runner = CliRunner()
+        new_title = "Perreando con Lucifer"
+        new_album = "Satanas se Fue de Rumba"
+        new_genre = "Techno-Cumbia Norteña Progresiva"
+        result = runner.invoke(cli, ["--file", audio_file,
+                                     "--tracktitle", new_title,
+                                     "--album", new_album,
+                                     "--genre", new_genre])
+        self.assertEqual(result.exit_code, 0)
+
+        ba_audio = base_audio.BaseAudio()
+        ba_audio.load_track(audio_file)
+        self.assertEqual(ba_audio.get_tag("tracktitle"), new_title)
+        self.assertEqual(ba_audio.get_tag("album"), new_album)
+        self.assertEqual(ba_audio.get_tag("genre"), new_genre)
+        audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
+        runner = CliRunner()
+        new_title = "Perreando con Lucifer"
+        result = runner.invoke(cli, ["--file", audio_file,
+                                     "--tracktitle", new_title])
+        self.assertEqual(result.exit_code, 0)
+
+    def test_run_cli_str_option_is_not_str(self):
+        '''
+        When attempting to set an str option as a non str:
+        1. Pass a valid audio file.
+        2. set 'tracktitle' as an int.
+        3. the cli should throw a message: '<option-name> expected to be
+        str'
+        '''
+        audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
+        runner = CliRunner()
+        new_title = 15
+        result = runner.invoke(cli, ["--file", audio_file,
+                                     "--tracktitle", new_title])
+        self.assertEqual(result.exit_code, 0)
+        expected = "'tracktitle' is expected to be a sequence of characters.\n"
+        self.assertEqual(result.output, expected)
+
     def reset_default_tags(self) -> None:
         audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
         ba_audio = base_audio.BaseAudio()
@@ -66,6 +115,7 @@ class TestCli(unittest.TestCase):
         ba_audio.set_tag("year", 2019)
         ba_audio.set_tag("tracknumber", 1)
         ba_audio.set_tag("title", "gloomy sky")
+        ba_audio.write_tags()
 
         audio_file = self.path_to_test_files + "\\audio_file_2.mp3"
         ba_audio = base_audio.BaseAudio()
@@ -75,3 +125,4 @@ class TestCli(unittest.TestCase):
         ba_audio.set_tag("tracknumber", 1)
         ba_audio.set_tag("title",
                          "Let Go of Time (and Time Will Let Go of You)")
+        ba_audio.write_tags()

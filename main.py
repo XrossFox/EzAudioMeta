@@ -1,6 +1,9 @@
 import click
 from audio import base_audio
 
+str_tags = ["album", "albumartist", "comment", "composer", "genre",
+            "lyrics", "tracktitle", "isrc"]
+
 
 @click.command()
 @click.option('--file', type=str)
@@ -50,19 +53,29 @@ def cli(file, album, albumartist, comment, compilation,
     }
     all_none = True
 
+    # If there is there is at least 1 tag set
     for key in tags:
         if tags[key] is not None:
             all_none = False
 
+    # if there are no tags set
     if all_none:
         print("No tags specified.")
         return
 
+    # get all tags that are actually set
     tags_to_set = {}
     for key in tags:
         if tags[key] is not None:
             tags_to_set[key] = tags[key]
 
+    # validate str types
+    for tag in tags_to_set:
+        if tag in str_tags and not isinstance(tags_to_set[tag], str):
+            print(f"'{tag}' is expected to be a sequence of characters.")
+            return
+
+    # send and write tags to file
     audio_file = base_audio.BaseAudio()
     audio_file.load_track(file)
     audio_file.set_tags(**tags_to_set)
