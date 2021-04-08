@@ -11,6 +11,7 @@ class TestCli(unittest.TestCase):
     def setUp(self) -> None:
         self.current_directory = str(Path(__file__).parent.absolute())
         self.path_to_test_files = str(self.current_directory) + "\\test_files"
+        self.reset_default_tags()
 
     def tearDown(self) -> None:
         self.reset_default_tags()
@@ -20,12 +21,44 @@ class TestCli(unittest.TestCase):
         When attempting to run the CLI without a specified audio file:
         1. invoke the cli without file parameter.
         2. Error code 0 expected.
-        3. Message: "No file specified.\n"
+        3. Message: "No file or directory specified.\n"
         '''
         runner = CliRunner()
         result = runner.invoke(cli)
         self.assertEqual(result.exit_code, 0)
-        self.assertEqual(result.output, "No file specified.\n")
+        self.assertEqual(result.output, "No file or directory specified.\n")
+
+    def test_run_cli_invalid_file(self):
+        '''
+        When attempting to run the CLI without a specified audio file:
+        1. invoke the cli with a directory instead of a file.
+        2. Error code 1 expected.
+        3. Message: "The specified File is not an actual File >:P"
+        '''
+        audio_directory = self.path_to_test_files
+        runner = CliRunner()
+        new_title = "Perreando con Lucifer"
+        result = runner.invoke(cli, ["--file", audio_directory,
+                                     "--tracktitle", new_title])
+        self.assertEqual(result.exit_code, 1)
+        self.assertEqual(result.output, "The specified File is not an"
+                                        + " actual File >:P\n")
+
+    def test_run_cli_file_does_not_exist(self):
+        '''
+        When attempting to run the CLI without a specified audio file:
+        1. invoke the cli with a file that does not exist.
+        2. Error code 1 expected.
+        3. Message: "Your File does not actually exists :c"
+        '''
+        audio_directory = self.path_to_test_files + "\\Rumba Generica.mp3"
+        runner = CliRunner()
+        new_title = "Perreando con Lucifer"
+        result = runner.invoke(cli, ["--file", audio_directory,
+                                     "--tracktitle", new_title])
+        self.assertEqual(result.exit_code, 1)
+        self.assertEqual(result.output, "Your file does not actually"
+                                        + " exists :c\n")
 
     def test_run_cli_no_tag(self):
         '''
@@ -101,9 +134,35 @@ class TestCli(unittest.TestCase):
         new_title = 15
         result = runner.invoke(cli, ["--file", audio_file,
                                      "--tracktitle", new_title])
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(result.exit_code, 1)
         expected = "'tracktitle' is expected to be a sequence of characters.\n"
         self.assertEqual(result.output, expected)
+
+    def test_run_cli_all_files(self):
+        '''
+        When attempting to change the meta tags of all valid audio files in
+        a directory:
+        1. Pass a valid directory.
+        2. Attempt to change the artist of all files.
+        3. Check for changes.
+        '''
+
+        audio_files_path = self.path_to_test_files
+        audio_file_1 = self.path_to_test_files + "\\audio_file_1.mp3"
+        audio_file_2 = self.path_to_test_files + "\\audio_file_2.mp3"
+        new_artist = "Lucifer"
+
+        runner = CliRunner()
+        result = runner.invoke(cli, ["--files-directory", audio_files_path,
+                                     "--artist", new_artist
+                                     ])
+
+        self.assertEqual(result.exit_code, 0)
+        audio = base_audio.BaseAudio()
+        audio.load_track(audio_file_1)
+        self.assertEqual(audio.get_tag("artist"), new_artist)
+        audio.load_track(audio_file_2)
+        self.assertEqual(audio.get_tag("artist"), new_artist)
 
     def reset_default_tags(self) -> None:
         audio_file = self.path_to_test_files + "\\audio_file_1.mp3"

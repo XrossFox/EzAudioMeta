@@ -17,11 +17,15 @@ the very least-
 `py main.py --file path/to/audio/file [options]`
 
 ### Options:
-Each option represents a tag to be set. All tags must be either text or a number. Note that numbers can also be parsed from text, so if you pass tracknumber tag as "15", it will work just fine. For safety, all text should be encased between double quotes.
-```
+Each option represents a tag to be set. All tags must be either text or a
+number. Note that numbers can also be parsed from text, so if you pass
+tracknumber tag as "15", it will work just fine. For safety, all text should be
+encased between double quotes.
+```bash
   --file TEXT
   --album TEXT
   --albumartist TEXT
+  --artist TEXT
   --comment TEXT
   --compilation INTEGER
   --composer TEXT
@@ -36,4 +40,8 @@ Each option represents a tag to be set. All tags must be either text or a number
   --isrc TEXT
   --help                 Show this message and exit.
 ```
-As an example: `py main.py --file "track 01.mp3" --tracktitle "Perreando hasta el suelo" --tracknumber "12" --album "Lucifer Se Fue De Rumba"`
+As an example: 
+```bash
+py main.py --file "track 01.mp3" --tracktitle "Perreando hasta el suelo"
+--tracknumber "12" --album "Lucifer Se Fue De Rumba"
+```
