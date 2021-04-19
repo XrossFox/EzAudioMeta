@@ -23,6 +23,7 @@ tracknumber tag as "15", it will work just fine. For safety, all text should be
 encased between double quotes.
 ```bash
   --file TEXT
+  --files-directory TEXT
   --album TEXT
   --albumartist TEXT
   --artist TEXT
@@ -40,8 +41,13 @@ encased between double quotes.
   --isrc TEXT
   --help                 Show this message and exit.
 ```
-As an example: 
+#### Single file as an example: 
 ```bash
 py main.py --file "track 01.mp3" --tracktitle "Perreando hasta el suelo"
 --tracknumber "12" --album "Lucifer Se Fue De Rumba"
 ```
+#### Directory as an example:
+```bash
+py main.py --files-directory "path/to/files" --artist "la wea masoquista" --album "lucifer se fue de rumba" --genre "electro cumbia progresiva" --year 1966
+```
+Note: Files are file system dependant, so if you are in windows: `path\to\file` and in linux: `path/to/file`. This script does distinguish between OSes (Windows and Linux so far)

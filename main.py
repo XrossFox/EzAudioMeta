@@ -1,9 +1,17 @@
-from os import path
+from os import path, listdir
+from sys import platform
 import click
 from audio import base_audio
 
 str_tags = ["album", "albumartist", "comment", "composer", "genre",
             "lyrics", "tracktitle", "isrc", "artist"]
+
+valid_extensions = ["aac", "aiff", "dsf", "flac", "m4a", "mp3", "ogg", "opus","wav", "wv"]
+
+if platform.startswith("win32"):
+    file_delimit = "\\"
+elif platform.startswith("linux"):
+    file_delimit = "/"
 
 
 @click.command()
@@ -38,6 +46,15 @@ def cli(file, files_directory, album, albumartist, artist, comment,
 
     file_validation(file, files_directory)
 
+    # look for all files in dir if valid
+    if files_directory and not file:
+        actual_files = list(filter(lambda a: a.split(".")[-1] in valid_extensions,listdir(files_directory)))
+        for i in range(len(actual_files)):
+            actual_files[i] = files_directory + file_delimit + actual_files[i]
+    # else just 1 file
+    else:
+        actual_files = [file]
+
     tags = {
         "album": album,
         "albumartist": albumartist,
@@ -62,8 +79,8 @@ def cli(file, files_directory, album, albumartist, artist, comment,
 
     validate_tags_types(**tags_to_set)
 
-    base_audio_wrapper(file, **tags_to_set)
-
+    for a_file in actual_files:
+        base_audio_wrapper(a_file, **tags_to_set)
 
 def validate_tags_types(**tags_to_set):
     '''

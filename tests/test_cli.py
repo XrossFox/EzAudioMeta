@@ -1,5 +1,7 @@
 import unittest
 from pathlib import Path
+from sys import platform
+
 from click.testing import CliRunner
 
 from audio import base_audio
@@ -10,7 +12,11 @@ class TestCli(unittest.TestCase):
 
     def setUp(self) -> None:
         self.current_directory = str(Path(__file__).parent.absolute())
-        self.path_to_test_files = str(self.current_directory) + "\\test_files"
+        if platform.startswith("win32"):
+            self.file_delimit = "\\"
+        elif platform.startswith("linux"):
+            self.file_delimit = "/"
+        self.path_to_test_files = str(self.current_directory) + self.file_delimit + "test_files"
         self.reset_default_tags()
 
     def tearDown(self) -> None:
@@ -51,7 +57,7 @@ class TestCli(unittest.TestCase):
         2. Error code 1 expected.
         3. Message: "Your File does not actually exists :c"
         '''
-        audio_directory = self.path_to_test_files + "\\Rumba Generica.mp3"
+        audio_directory = self.path_to_test_files + self.file_delimit + "Rumba Generica.mp3"
         runner = CliRunner()
         new_title = "Perreando con Lucifer"
         result = runner.invoke(cli, ["--file", audio_directory,
@@ -67,7 +73,7 @@ class TestCli(unittest.TestCase):
         2. Error code 0 expected.
         3. Message: "No tags specified.\n#
         '''
-        audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
+        audio_file = self.path_to_test_files + self.file_delimit + "audio_file_1.mp3"
         runner = CliRunner()
         result = runner.invoke(cli, ["--file", audio_file])
         self.assertEqual(result.exit_code, 0)
@@ -80,7 +86,7 @@ class TestCli(unittest.TestCase):
         2. set the 'tracktitle' tag.
         3. check for changes.
         '''
-        audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
+        audio_file = self.path_to_test_files + self.file_delimit + "audio_file_1.mp3"
         runner = CliRunner()
         new_title = "Perreando con Lucifer"
         result = runner.invoke(cli, ["--file", audio_file,
@@ -98,7 +104,7 @@ class TestCli(unittest.TestCase):
         2. set the 'tracktitle', 'album', and 'genre' tags.
         3. check for changes.
         '''
-        audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
+        audio_file = self.path_to_test_files + self.file_delimit + "audio_file_1.mp3"
         runner = CliRunner()
         new_title = "Perreando con Lucifer"
         new_album = "Satanas se Fue de Rumba"
@@ -114,7 +120,7 @@ class TestCli(unittest.TestCase):
         self.assertEqual(ba_audio.get_tag("tracktitle"), new_title)
         self.assertEqual(ba_audio.get_tag("album"), new_album)
         self.assertEqual(ba_audio.get_tag("genre"), new_genre)
-        audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
+        audio_file = self.path_to_test_files + self.file_delimit + "audio_file_1.mp3"
         runner = CliRunner()
         new_title = "Perreando con Lucifer"
         result = runner.invoke(cli, ["--file", audio_file,
@@ -129,7 +135,7 @@ class TestCli(unittest.TestCase):
         3. the cli should throw a message: '<option-name> expected to be
         str'
         '''
-        audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
+        audio_file = self.path_to_test_files + self.file_delimit + "audio_file_1.mp3"
         runner = CliRunner()
         new_title = 15
         result = runner.invoke(cli, ["--file", audio_file,
@@ -148,8 +154,8 @@ class TestCli(unittest.TestCase):
         '''
 
         audio_files_path = self.path_to_test_files
-        audio_file_1 = self.path_to_test_files + "\\audio_file_1.mp3"
-        audio_file_2 = self.path_to_test_files + "\\audio_file_2.mp3"
+        audio_file_1 = self.path_to_test_files + self.file_delimit + "audio_file_1.mp3"
+        audio_file_2 = self.path_to_test_files + self.file_delimit + "audio_file_2.mp3"
         new_artist = "Lucifer"
 
         runner = CliRunner()
@@ -165,7 +171,7 @@ class TestCli(unittest.TestCase):
         self.assertEqual(audio.get_tag("artist"), new_artist)
 
     def reset_default_tags(self) -> None:
-        audio_file = self.path_to_test_files + "\\audio_file_1.mp3"
+        audio_file = self.path_to_test_files + self.file_delimit + "audio_file_1.mp3"
         ba_audio = base_audio.BaseAudio()
         ba_audio.load_track(audio_file)
         ba_audio.set_tag("artist", "Dee Yan-Key")
@@ -176,7 +182,7 @@ class TestCli(unittest.TestCase):
         ba_audio.set_tag("title", "gloomy sky")
         ba_audio.write_tags()
 
-        audio_file = self.path_to_test_files + "\\audio_file_2.mp3"
+        audio_file = self.path_to_test_files + self.file_delimit + "audio_file_2.mp3"
         ba_audio = base_audio.BaseAudio()
         ba_audio.load_track(audio_file)
         ba_audio.set_tag("artist", "Siddhartha Corsus")
