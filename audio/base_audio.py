@@ -30,6 +30,8 @@ class BaseAudio:
     def load_track(self, file_path) -> None:
         '''
         Loads an audio file.
+        ---
+        Raises: NotImplementedError
         '''
         self._current_file = load_file(file_path)
 

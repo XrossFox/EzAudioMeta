@@ -189,17 +189,52 @@ class TestCli(unittest.TestCase):
         2. The syntax should be ass follows:
         option=value
         option=value
-        3. All options remain the same, just without the first two hyphens at the beginning,
+        3. All options remain the same, just without the first two hyphens at
+        the beginning,
         so --file becomes file and --files-directory becomes files-directory.
         4. Only one option per line.
         '''
+        tags_and_values = {
+            "artist": "Los Luciferinos",
+            "album": "Rumbeando en el Noveno Infierno",
+            "tracktitle": "El Perreo de Lilith",
+            "file": self.path_to_test_files + self.file_delimit +
+            "audio_file_1.mp3",
+            "year": 1984
+        }
+
+        options = self.to_options(**tags_and_values)
+
+        test_file_txt = self.write_to_test_text_file(*options)
+
+        runner = CliRunner()
+        result = runner.invoke(cli, ["--from-file", test_file_txt])
+
+        self.assertEqual(result.exit_code, 0)
+
+        audio = base_audio.BaseAudio()
+        audio.load_track(tags_and_values["file"])
+
+        for key in tags_and_values:
+
+            if key == "file":
+                continue
+
+            self.assertEqual(audio.get_tag(key), tags_and_values[key])
+
+    def to_options(self, **tags_and_values) -> list:
+        '''
+        Receives a dictionary of 'tag: value' pair and creates a list from
+        it. The list is parsed as follows: tag=value\\n. This list
+        is meant to be written to the test file using
+        write_to_test_text_file().
+        '''
         options = list()
-        options.append(
-            "file="+self.path_to_test_files + self.file_delimit +
-            "audio_file_1.mp3")
-        options.append("artist=Los Luciferinos")
-        options.append("album=Rumbeando en el Noveno Infierno")
-        options.append("tracktitle=El Perreo de Lilith")
+        for key in tags_and_values:
+
+            options.append(key + "=" + str(tags_and_values[key])+"\n")
+
+        return options
 
     def write_to_test_text_file(self, *lines_to_write) -> str:
         """
@@ -210,11 +245,13 @@ class TestCli(unittest.TestCase):
         The random number is between 1 and 10,000.
         """
         test_file_path = self.path_to_test_files + self.file_delimit + \
-            "test_text_file" + \
-            str(randrange(1, 10000))
+            "test_text_file_" + \
+            str(randrange(1, 10000)) + ".txt"
 
         with open(test_file_path, mode="w") as test_file:
             test_file.writelines(lines_to_write)
+
+        return test_file_path
 
     def reset_default_tags(self) -> None:
         audio_file = \

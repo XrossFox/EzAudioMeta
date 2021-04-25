@@ -6,7 +6,11 @@ from audio import base_audio
 str_tags = ["album", "albumartist", "comment", "composer", "genre",
             "lyrics", "tracktitle", "isrc", "artist"]
 
-valid_extensions = ["aac", "aiff", "dsf", "flac", "m4a", "mp3", "ogg", "opus","wav", "wv"]
+int_tags = ["compilation", "discnumber", "totaldiscs", "totaltracks",
+            "tracknumber", "year", ]
+
+valid_extensions = ["aac", "aiff", "dsf", "flac", "m4a", "mp3",
+                    "ogg", "opus", "wav", "wv"]
 
 if platform.startswith("win32"):
     file_delimit = "\\"
@@ -17,6 +21,7 @@ elif platform.startswith("linux"):
 @click.command()
 @click.option('--file', type=str)
 @click.option('--files-directory', type=str)
+@click.option('--from-file', type=str)
 @click.option('--album', type=str)
 @click.option('--albumartist', type=str)
 @click.option('--artist', type=str)
@@ -32,7 +37,7 @@ elif platform.startswith("linux"):
 @click.option('--tracktitle', type=str)
 @click.option('--year', type=int)
 @click.option('--isrc', type=str)
-def cli(file, files_directory, album, albumartist, artist, comment,
+def cli(file, files_directory, from_file, album, albumartist, artist, comment,
         compilation,
         composer, discnumber, genre, lyrics,
         totaldiscs, totaltracks,
@@ -43,17 +48,6 @@ def cli(file, files_directory, album, albumartist, artist, comment,
     strings, but some like 'tracknumber' are numbers. At least a file and a tag
     are expected to be set.
     '''
-
-    file_validation(file, files_directory)
-
-    # look for all files in dir if valid
-    if files_directory and not file:
-        actual_files = list(filter(lambda a: a.split(".")[-1] in valid_extensions,listdir(files_directory)))
-        for i in range(len(actual_files)):
-            actual_files[i] = files_directory + file_delimit + actual_files[i]
-    # else just 1 file
-    else:
-        actual_files = [file]
 
     tags = {
         "album": album,
@@ -73,6 +67,28 @@ def cli(file, files_directory, album, albumartist, artist, comment,
         "isrc": isrc,
     }
 
+    if from_file is not None:
+        tags, file, files_directory = parse_from_file(tags,
+                                                      file,
+                                                      files_directory,
+                                                      from_file)
+
+    file_validation(file, files_directory)
+
+    # look for all files in dir if valid
+    if files_directory and not file:
+        actual_files = list(
+                        filter(
+                            lambda a: a.split(".")[-1] in valid_extensions,
+                            listdir(files_directory))
+                        )
+
+        for i in range(len(actual_files)):
+            actual_files[i] = files_directory + file_delimit + actual_files[i]
+    # else just 1 file
+    else:
+        actual_files = [file]
+
     tags_validation(**tags)
 
     tags_to_set = actual_tags(**tags)
@@ -82,6 +98,41 @@ def cli(file, files_directory, album, albumartist, artist, comment,
     for a_file in actual_files:
         base_audio_wrapper(a_file, **tags_to_set)
 
+
+def parse_from_file(tags, file, files_directory, from_file) -> tuple:
+    '''
+    Receives the tags dict, file, and files_directory variables, and
+    maps the values from the given text file.
+    -----
+    Returns: a tuple (tags, file, files_directory).
+    '''
+    with open(from_file, 'r') as text_file:
+        lines = text_file.readlines()
+
+        for line in lines:
+            tmp = line.split("=")
+
+            if tmp[0] in tags.keys():
+                tags[tmp[0]] = tmp[1].strip()
+
+                try:
+                    if tmp[0] in int_tags:
+                        tags[tmp[0]] = int(tags[tmp[0]])
+                except Exception as e:
+                    print(e)
+                    print("The following tag is expected to" +
+                          f" be a number: {tmp[0]}")
+                    exit(1)
+
+            elif tmp[0] == "file":
+                file = tmp[1].strip()
+
+            elif tmp[0] == "files-directory":
+                files_directory == tmp[1].strip()
+
+    return(tags, file, files_directory)
+
+
 def validate_tags_types(**tags_to_set):
     '''
     Validates that each actual tag is of the expected type
@@ -89,6 +140,9 @@ def validate_tags_types(**tags_to_set):
     for tag in tags_to_set:
         if tag in str_tags and not isinstance(tags_to_set[tag], str):
             print(f"'{tag}' is expected to be a sequence of characters.")
+            exit(1)
+        elif tag in int_tags and not isinstance(tags_to_set[tag], int):
+            print(f"'{tag}' is expected to be a sequence of numbers.")
             exit(1)
 
 
@@ -148,10 +202,21 @@ def base_audio_wrapper(file, **tags_to_set):
     '''
     send and write tags to file
     '''
-    audio_file = base_audio.BaseAudio()
-    audio_file.load_track(file)
-    audio_file.set_tags(**tags_to_set)
-    audio_file.write_tags()
+    try:
+        audio_file = base_audio.BaseAudio()
+        audio_file.load_track(file)
+        audio_file.set_tags(**tags_to_set)
+        audio_file.write_tags()
+    except NotImplementedError as nie:
+        print(nie)
+        print(f"Error while loading file:{file}")
+        exit(1)
+    except TypeError as te:
+        print(te)
+        exit(1)
+    except Exception as e:
+        print(e)
+        exit(1)
 
 
 if __name__ == "__main__":
