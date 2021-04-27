@@ -222,6 +222,86 @@ class TestCli(unittest.TestCase):
 
             self.assertEqual(audio.get_tag(key), tags_and_values[key])
 
+    def test_run_cli_from_text_file_multiple_files(self):
+        '''
+        When attempting to set tags to multiple files in a directory from
+        a text file
+        1. Load a text file with the expected tags. Pointing to
+        a directory with multiple audio files.
+        2. The syntax should be as follows:
+        option=value
+        option=value
+        3. All options remain the same, just without the first two hyphens at
+        the beginning,
+        so --file becomes file and --files-directory becomes files-directory.
+        4. Only one option per line.
+        '''
+        tags_and_values = {
+            "artist": "Los Luciferinos",
+            "album": "Rumbeando en el Noveno Infierno",
+            "files-directory": self.path_to_test_files,
+            "year": 1984
+        }
+
+        options = self.to_options(**tags_and_values)
+
+        test_file_txt = self.write_to_test_text_file(*options)
+
+        runner = CliRunner()
+        result = runner.invoke(cli, ["--from-file", test_file_txt])
+
+        self.assertEqual(result.exit_code, 0)
+
+        audio = base_audio.BaseAudio()
+        audio.load_track(tags_and_values["files-directory"] +
+                         self.file_delimit +
+                         "audio_file_1.mp3")
+
+        for key in tags_and_values:
+
+            if key == "files-directory":
+                continue
+
+            self.assertEqual(audio.get_tag(key), tags_and_values[key])
+
+        audio.load_track(tags_and_values["files-directory"] +
+                         self.file_delimit +
+                         "audio_file_2.mp3")
+
+        for key in tags_and_values:
+
+            if key == "files-directory":
+                continue
+
+            self.assertEqual(audio.get_tag(key), tags_and_values[key])
+
+    def test_run_cli_from_text_file_doesnt_exist(self):
+        '''
+        When attempting to load tags from a file, with a missing text file.
+        1. Attempt to load a text file that is not valid.
+        2. An exception should be raised.
+        '''
+
+        runner = CliRunner()
+        inv = "invalid"
+        result = runner.invoke(cli, ["--from-file", inv])
+
+        self.assertEqual(result.exit_code, 1)
+        self.assertEqual(result.output, f"{inv} doesn't exist\n")
+
+    def test_run_cli_from_text_file_file_is_not_file(self):
+        '''
+        When attempting to load tags from a file, with a missing text file.
+        1. Attempt to load a text file that is not valid.
+        2. An exception should be raised.
+        '''
+        runner = CliRunner()
+        inv = self.path_to_test_files
+        result = runner.invoke(cli, ["--from-file", inv])
+
+        self.assertEqual(result.exit_code, 1)
+        self.assertEqual(result.output, f"{inv} is not a valid file\n")
+
     def to_options(self, **tags_and_values) -> list:
         '''
         Receives a dictionary of 'tag: value' pair and creates a list from

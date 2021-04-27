@@ -106,6 +106,7 @@ def parse_from_file(tags, file, files_directory, from_file) -> tuple:
     -----
     Returns: a tuple (tags, file, files_directory).
     '''
+    file_validation(from_file=from_file)
     with open(from_file, 'r') as text_file:
         lines = text_file.readlines()
 
@@ -128,7 +129,7 @@ def parse_from_file(tags, file, files_directory, from_file) -> tuple:
                 file = tmp[1].strip()
 
             elif tmp[0] == "files-directory":
-                files_directory == tmp[1].strip()
+                files_directory = tmp[1].strip()
 
     return(tags, file, files_directory)
 
@@ -172,12 +173,12 @@ def tags_validation(**tags):
         exit(0)
 
 
-def file_validation(file=None, files_directory=None) -> None:
+def file_validation(file=None, files_directory=None, from_file=None) -> None:
     '''
-    Validates that there is a file or a directory passed.
+    Validates that there is a file or a directory passed (or a from_file).
     '''
 
-    if file is None and files_directory is None:
+    if file is None and files_directory is None and from_file is None:
         print("No file or directory specified.")
         exit(0)
 
@@ -196,6 +197,15 @@ def file_validation(file=None, files_directory=None) -> None:
         if not path.isdir(files_directory):
             print("The specified directory is not an actual directory >:P")
             exit(1)
+
+    if from_file:
+        if not path.exists(from_file):
+            print(f"{from_file} doesn't exist")
+            exit(1)
+        if not path.isfile(from_file):
+            print(f"{from_file} is not a valid file")
+            exit(1)
+
 
 
 def base_audio_wrapper(file, **tags_to_set):
