@@ -24,6 +24,7 @@ encased between double quotes.
 ```bash
   --file TEXT
   --files-directory TEXT
+  --from-file TEXT
   --album TEXT
   --albumartist TEXT
   --artist TEXT
@@ -51,3 +52,19 @@ py main.py --file "track 01.mp3" --tracktitle "Perreando hasta el suelo"
 py main.py --files-directory "path/to/files" --artist "la wea masoquista" --album "lucifer se fue de rumba" --genre "electro cumbia progresiva" --year 1966
 ```
 Note: Files are file system dependant, so if you are in windows: `path\to\file` and in linux: `path/to/file`. This script does distinguish between OSes (Windows and Linux so far)
+
+#### Using --from-file:
+This options lets you load the options from a text file, line by line, something like this:
+```bash
+file=value
+files-directory=value
+album=value
+albumartist=value
+artist=value
+```
+Please note that you shouldn't use `file` and `files-directory` together. Also note that all options are missing the `--` at the beginning, and there is an `=` for separation.
+
+You should call the script like this: 
+```bash
+py main.py --from-file "path/to/your/text/file.txt"
+```
