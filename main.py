@@ -207,7 +207,6 @@ def file_validation(file=None, files_directory=None, from_file=None) -> None:
             exit(1)
 
 
-
 def base_audio_wrapper(file, **tags_to_set):
     '''
     send and write tags to file
