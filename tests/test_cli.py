@@ -20,6 +20,11 @@ class TestCli(unittest.TestCase):
         self.path_to_test_files = \
             str(self.current_directory) + self.file_delimit + "test_files"
 
+        # audio files constant name declaration
+        self.audio_file_1 = "audio_file_1.mp3"
+        self.audio_file_2 = "audio_file_2.mp3"
+        self.audio_file_3 = "01_audio_test_file_3.mp3"
+
         self.reset_default_tags()
 
     def tearDown(self) -> None:
@@ -301,6 +306,29 @@ class TestCli(unittest.TestCase):
 
         self.assertEqual(result.exit_code, 1)
         self.assertEqual(result.output, f"{inv} is not a valid file\n")
+
+    def test_extract_title_title_capitalize(self) -> None:
+        '''
+        When passing a regex expression to extract and capitalize the
+        track title from the actual audio file,
+        1. Pass a valid audio file.
+        2. Pass a valid regex expression.
+        3. The tracktitle tag should be names accordingly.
+        '''
+        runner = CliRunner()
+        audio_file = self.path_to_test_files + self.file_delimit +\
+            self.audio_file_3
+
+        pattern = "(?<=\\d\\d).+(?=.mp3)"
+
+        result = runner.invoke(cli, ["--from-file", audio_file,
+                                     "--parse-title-capitalize", pattern]
+                               )
+
+        expected = "_Audio_Test_File_3"
+
+        # [WIP]
+        pass
 
     def to_options(self, **tags_and_values) -> list:
         '''
