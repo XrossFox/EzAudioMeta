@@ -32,8 +32,8 @@ class TestOptionalStringMatchers(unittest.TestCase):
         pattern = "(?<=[0-9]\\s).+(?=\\.flac)"
         expected = "Of Lillies and Remains"
 
-        track_title = osm.extract_track_title_title_capitalize(file_name,
-                                                               pattern)
+        track_title = osm.extract_track_title_capitalize(file_name,
+                                                         pattern)
 
         self.assertEquals(expected, track_title)
 
@@ -48,14 +48,11 @@ class TestOptionalStringMatchers(unittest.TestCase):
         osm = OptionalStringMatchers()
         file_name = "07.The Ballad Of Resurrection" +\
                     " Joe And Rosa Whore (Ilsa She-Wolf Of Hollywood]).flac"
-
         pattern = "(?<=[0-9]\\.).+(?=\\.flac)"
-
         expected = "The Ballad of Resurrection" +\
                    " Joe and Rosa Whore (Ilsa She-Wolf of Hollywood])"
-
-        track_title = osm.extract_track_title_title_capitalize(file_name,
-                                                               pattern)
+        track_title = osm.extract_track_title_capitalize(file_name,
+                                                         pattern)
 
         self.assertEquals(expected, track_title)
 
@@ -70,13 +67,11 @@ class TestOptionalStringMatchers(unittest.TestCase):
         osm = OptionalStringMatchers()
         file_name = "10.Return Of The Phantom Stranger" +\
                     " (Tuesday Night At The Chop Shop Mix).flac"
-
         pattern = "(?<=[0-9]\\.).+(?=\\.flac)"
         expected = "Return of the Phantom Stranger" +\
                    " (Tuesday Night at the Chop Shop Mix)"
-
-        track_title = osm.extract_track_title_title_capitalize(file_name,
-                                                               pattern)
+        track_title = osm.extract_track_title_capitalize(file_name,
+                                                         pattern)
 
         self.assertEquals(expected, track_title)
 
@@ -89,12 +84,25 @@ class TestOptionalStringMatchers(unittest.TestCase):
         osm = OptionalStringMatchers()
         file_name = "10.return of the phantom stranger" +\
                     " (tuesday night at the chop shop mix).flac"
-
         expected = "return of the phantom stranger " +\
                    "(tuesday night at the chop shop mix)"
-
         pattern = "(?<=[0-9]\\.).+(?=\\.flac)"
-
         track_title = osm.extract_track_title_as_is(file_name, pattern)
 
         self.assertEqual(expected, track_title)
+
+    def test_extract_title_cleanup_and_capitalize(self) -> None:
+        '''
+        1. Given an audio file name-
+        2. And given a valid Regex expression.
+        3. Return the track title withouth "-", "_" and multiples
+        white spaces, an trimmed.
+        '''
+        osm = OptionalStringMatchers()
+        file_name = "01 my-name_is  tony--mon__tana.flac"
+        expected = "My Name Is Tony Mon Tana"
+        pattern = "(?<=\\d\\d\\s).+(?=\\.flac)"
+        title = osm.extract_track_title_cleanup_and_capitalize(file_name,
+                                                               pattern)
+
+        self.assertEqual(expected, title)

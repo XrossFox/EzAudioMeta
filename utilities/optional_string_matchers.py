@@ -1,4 +1,5 @@
 from re import search
+from re import sub
 
 
 class OptionalStringMatchers:
@@ -41,10 +42,12 @@ class OptionalStringMatchers:
         Receives the name of the track and returns the substring that
         matches the regex expression as is, no further processing is done.
         '''
-        return search(pattern, file_name).group(0)
+        title = search(pattern, file_name).group(0)
+        title = title.strip()
+        return title
 
-    def extract_track_title_title_capitalize(self, file_name: str,
-                                             pattern: str) -> str:
+    def extract_track_title_capitalize(self, file_name: str,
+                                       pattern: str) -> str:
         '''
         Receives the name og the track and returns the substring that
         matches the regex expression and the it is capitalized following the
@@ -74,7 +77,9 @@ class OptionalStringMatchers:
 
             list_words[i] = self._capitalize_first(list_words[i])
 
-        return " ".join(list_words)
+        title = " ".join(list_words)
+        title = title.strip()
+        return title
 
     def _capitalize_first(self, string: str) -> str:
         '''
@@ -88,8 +93,27 @@ class OptionalStringMatchers:
             capitalized = [self._capitalize_first(i) for i in sub_strings]
             return "-".join(capitalized)
 
+        if "_" in string:
+            sub_strings = string.split("_")
+            capitalized = [self._capitalize_first(i) for i in sub_strings]
+            return "_".join(capitalized)
+
         string = string.lower()
         for i in range(len(string)):
             if string[i].isalpha():
                 return string.replace(string[i], string[i].upper(), 1)
         return string
+
+    def extract_track_title_cleanup_and_capitalize(self, file_name: str,
+                                                   pattern: str) -> str:
+        '''
+        Receives a string, replaces all '-' and '_', trailing or duplicate
+        white spaces for single white spaces, and trims leading and trainling
+        spaces. Then applies regular title capitalization.
+        '''
+        pattern_remover = "(_+|-+| {2,})"
+        clean_string = sub(pattern_remover, " ", file_name)
+        clean_string = self.extract_track_title_capitalize(clean_string,
+                                                           pattern)
+        clean_string = clean_string.strip()
+        return clean_string

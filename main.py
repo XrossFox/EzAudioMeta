@@ -19,7 +19,24 @@ elif platform.startswith("linux"):
     file_delimit = "/"
 
 parse_cap_help = "Parses the 'tracktitle' from the actual file name." +\
-    " You must provide a valid regex expresion. Overrides 'tracktitle' option."
+    " The track title is capitalized as a title." +\
+    " You must provide a valid regex expresion." +\
+    " Overrides 'tracktitle' option." + " NOTE: please escape all '\\' as" +\
+    " '\\\\', otherwise Regex engine might complain." +\
+    " Ej. (?<=\\\\d\\\\d\\\\s).+(?=\\\\.flac)."
+parse_asis_help = "Parses the 'tracktitle' from the actual file name." +\
+    " The track title is left as is with no capitalization or processing." +\
+    " You must provide a valid regex expresion." +\
+    " Overrides 'tracktitle' option." + " NOTE: please escape all '\\' as" +\
+    " '\\\\', otherwise Regex engine might complain." +\
+    " Ej. (?<=\\\\d\\\\d\\\\s).+(?=\\\\.flac)."
+parse_clean_help = "Parses the 'tracktitle' from the actual file name." +\
+    " The track title has all '-', '_' and multiple whitespaces" +\
+    "removed and trimmed, and then is title capitalized." +\
+    " You must provide a valid regex expresion." +\
+    " Overrides 'tracktitle' option." + " NOTE: please escape all '\\' as" +\
+    " '\\\\', otherwise Regex engine might complain." +\
+    " Ej. (?<=\\\\d\\\\d\\\\s).+(?=\\\\.flac)."
 
 _op_str_matchers = OptionalStringMatchers()
 
@@ -44,11 +61,14 @@ _op_str_matchers = OptionalStringMatchers()
 @click.option('--year', type=int)
 @click.option('--isrc', type=str)
 @click.option('--parse-title-capitalize', type=str, help=parse_cap_help)
+@click.option('--parse-title-as-is', type=str, help=parse_asis_help)
+@click.option('--parse-title-clean', type=str, help=parse_clean_help)
 def cli(file, files_directory, from_file, album, albumartist, artist, comment,
         compilation,
         composer, discnumber, genre, lyrics,
         totaldiscs, totaltracks,
-        tracknumber, tracktitle, year, isrc, parse_title_capitalize):
+        tracknumber, tracktitle, year, isrc, parse_title_capitalize,
+        parse_title_as_is, parse_title_clean):
     '''
     This CLI application receives an audio file and the tags that are to be
     setted/changed. Most tags are expected to be character
@@ -96,7 +116,9 @@ def cli(file, files_directory, from_file, album, albumartist, artist, comment,
     else:
         actual_files = [file]
 
-    tags_validation(**tags)
+    tags_validation((parse_title_as_is
+                    or parse_title_capitalize
+                    or parse_title_clean), **tags)
 
     tags_to_set = actual_tags(**tags)
 
@@ -109,8 +131,21 @@ def cli(file, files_directory, from_file, album, albumartist, artist, comment,
         # the tags to set dict. Since its called for all tracks, it will always
         # update before setting the tags to file.
         if parse_title_capitalize:
-            tags_to_set["tracktitle"] = +\
-                _op_str_matchers.extract_track_title_title_capitalize(a_file)
+            tags_to_set["tracktitle"] =\
+                 _op_str_matchers.extract_track_title_capitalize(a_file,
+                                                        parse_title_capitalize)
+
+        if parse_title_as_is:
+            tags_to_set["tracktitle"] =\
+                 _op_str_matchers.extract_track_title_as_is(a_file,
+                                                            parse_title_as_is)
+
+        if parse_title_clean:
+            tags_to_set["tracktitle"] =\
+                _op_str_matchers.extract_track_title_cleanup_and_capitalize(
+                    a_file,
+                    parse_title_clean
+                )
 
         base_audio_wrapper(a_file, **tags_to_set)
 
@@ -174,15 +209,19 @@ def actual_tags(**tags) -> dict:
     return tags_to_set
 
 
-def tags_validation(**tags):
+def tags_validation(parse_title_enabled: bool = None, **tags) -> None:
     '''
-    Checks that there is at least 1 tag set
+    Checks that there is at least 1 tag set, title parser is enabled or
+    else terminates the process with 0.
     '''
 
     all_none = True
     for key in tags:
         if tags[key] is not None:
             all_none = False
+
+    if parse_title_enabled:
+        all_none = False
 
     if all_none:
         print("No tags specified.")

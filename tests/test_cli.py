@@ -332,6 +332,57 @@ class TestCli(unittest.TestCase):
         audio.load_track(audio_file)
         self.assertEqual(audio.get_tag("tracktitle"), expected)
 
+    def test_extract_title_title_as_is(self) -> None:
+        '''
+        When passing a regex expression to extract as is the
+        track title from the actual audio file,
+        1. Pass a valid audio file.
+        2. Pass a valid regex expression.
+        3. The tracktitle tag should be named as it appears in title.
+        '''
+        runner = CliRunner()
+        audio_file = self.path_to_test_files + self.file_delimit +\
+            self.audio_file_3
+
+        pattern = "(?<=\\d\\d).+(?=.mp3)"
+
+        result = runner.invoke(cli, ["--file", audio_file,
+                                     "--parse-title-as-is", pattern]
+                               )
+
+        expected = "_audio_test_file_3"
+
+        self.assertEqual(result.exit_code, 0)
+        audio = base_audio.BaseAudio()
+        audio.load_track(audio_file)
+        self.assertEqual(audio.get_tag("tracktitle"), expected)
+
+    def test_extract_title_cleanup_and_capitalize(self) -> None:
+        '''
+        When passing a regex expression to extract, cleanup and Capitalize
+        track title from the actual audio file,
+        1. Pass a valid audio file.
+        2. Pass a valid regex expression.
+        3. The tracktitle tag should be named without "-", "_" and multiples
+        white spaces.
+        '''
+        runner = CliRunner()
+        audio_file = self.path_to_test_files + self.file_delimit +\
+            self.audio_file_3
+
+        pattern = "(?<=\\d\\d).+(?=.mp3)"
+
+        result = runner.invoke(cli, ["--file", audio_file,
+                                     "--parse-title-clean", pattern]
+                               )
+
+        expected = "Audio Test File 3"
+
+        self.assertEqual(result.exit_code, 0)
+        audio = base_audio.BaseAudio()
+        audio.load_track(audio_file)
+        self.assertEqual(audio.get_tag("tracktitle"), expected)
+
     def to_options(self, **tags_and_values) -> list:
         '''
         Receives a dictionary of 'tag: value' pair and creates a list from

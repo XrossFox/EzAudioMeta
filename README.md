@@ -40,6 +40,30 @@ encased between double quotes.
   --tracktitle TEXT
   --year INTEGER
   --isrc TEXT
+  --parse-title-capitalize TEXT  Parses the 'tracktitle' from the actual file
+                                 name. The track title is capitalized as a
+                                 title. You must provide a valid regex
+                                 expresion. Overrides 'tracktitle' option.
+                                 NOTE: please escape all '\' as '\\',
+                                 otherwise Regex engine might complain. Ej.
+                                 (?<=\\d\\d\\s).+(?=\\.flac).
+
+  --parse-title-as-is TEXT       Parses the 'tracktitle' from the actual file
+                                 name. The track title is left as is with no
+                                 capitalization or processing. You must
+                                 provide a valid regex expresion. Overrides
+                                 'tracktitle' option. NOTE: please escape all
+                                 '\' as '\\', otherwise Regex engine might
+                                 complain. Ej. (?<=\\d\\d\\s).+(?=\\.flac).
+
+  --parse-title-clean TEXT       Parses the 'tracktitle' from the actual file
+                                 name. The track title has all '-', '_' and
+                                 multiple whitespacesremoved and trimmed, and
+                                 then is title capitalized. You must provide a
+                                 valid regex expresion. Overrides 'tracktitle'
+                                 option. NOTE: please escape all '\' as '\\',
+                                 otherwise Regex engine might complain. Ej.
+                                 (?<=\\d\\d\\s).+(?=\\.flac).
   --help                 Show this message and exit.
 ```
 #### Single file as an example: 
@@ -68,3 +92,16 @@ You should call the script like this:
 ```bash
 py main.py --from-file "path/to/your/text/file.txt"
 ```
+
+#### Parsing track titles from file name using Regex.
+EzAudioMeta allows to parse the 'tracktitle' tag from the actual file name using regular expressions. Usage is as follows 
+```bash
+py main.py --from-file "path/to/your/text/file.txt" --parse-title-capitalize "(?<=\\d\\d\\s).+(?=\\.flac)"
+```
+Given an audio file `01 my_track_title.flac`, the expected result should be:
+
+- `--parse-title-capitalize`: My_Track_Title
+- `--parse-title-as-is`: my_track_title
+- `--parse-title-clean`: My Track Title
+
+Note: please mind that all `\` are scaped as `\\`' since they are plain python strings,
