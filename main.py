@@ -1,5 +1,6 @@
 from os import path, listdir
 from sys import platform
+from utilities.optional_string_matchers import OptionalStringMatchers
 import click
 from audio import base_audio
 
@@ -16,6 +17,11 @@ if platform.startswith("win32"):
     file_delimit = "\\"
 elif platform.startswith("linux"):
     file_delimit = "/"
+
+parse_cap_help = "Parses the 'tracktitle' from the actual file name." +\
+    " You must provide a valid regex expresion. Overrides 'tracktitle' option."
+
+_op_str_matchers = OptionalStringMatchers()
 
 
 @click.command()
@@ -37,11 +43,12 @@ elif platform.startswith("linux"):
 @click.option('--tracktitle', type=str)
 @click.option('--year', type=int)
 @click.option('--isrc', type=str)
+@click.option('--parse-title-capitalize', type=str, help=parse_cap_help)
 def cli(file, files_directory, from_file, album, albumartist, artist, comment,
         compilation,
         composer, discnumber, genre, lyrics,
         totaldiscs, totaltracks,
-        tracknumber, tracktitle, year, isrc):
+        tracknumber, tracktitle, year, isrc, parse_title_capitalize):
     '''
     This CLI application receives an audio file and the tags that are to be
     setted/changed. Most tags are expected to be character
@@ -96,6 +103,15 @@ def cli(file, files_directory, from_file, album, albumartist, artist, comment,
     validate_tags_types(**tags_to_set)
 
     for a_file in actual_files:
+
+        # If parse from title is set, then each time a track is received, the
+        # file name will be parsed to extract the track title and added to
+        # the tags to set dict. Since its called for all tracks, it will always
+        # update before setting the tags to file.
+        if parse_title_capitalize:
+            tags_to_set["tracktitle"] = +\
+                _op_str_matchers.extract_track_title_title_capitalize(a_file)
+
         base_audio_wrapper(a_file, **tags_to_set)
 
 

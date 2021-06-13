@@ -321,14 +321,16 @@ class TestCli(unittest.TestCase):
 
         pattern = "(?<=\\d\\d).+(?=.mp3)"
 
-        result = runner.invoke(cli, ["--from-file", audio_file,
+        result = runner.invoke(cli, ["--file", audio_file,
                                      "--parse-title-capitalize", pattern]
                                )
 
         expected = "_Audio_Test_File_3"
 
-        # [WIP]
-        pass
+        self.assertEqual(result.exit_code, 0)
+        audio = base_audio.BaseAudio()
+        audio.load_track(audio_file)
+        self.assertEqual(audio.get_tag("tracktitle"), expected)
 
     def to_options(self, **tags_and_values) -> list:
         '''
@@ -383,4 +385,14 @@ class TestCli(unittest.TestCase):
         ba_audio.set_tag("tracknumber", 1)
         ba_audio.set_tag("title",
                          "Let Go of Time (and Time Will Let Go of You)")
+
+        audio_file = \
+            self.path_to_test_files + self.file_delimit + self.audio_file_3
+        ba_audio = base_audio.BaseAudio()
+        ba_audio.load_track(audio_file)
+        ba_audio.set_tag("artist", "Unknown")
+        ba_audio.set_tag("album", "Unknown")
+        ba_audio.set_tag("tracknumber", 1)
+        ba_audio.set_tag("title",
+                         "Unknown")
         ba_audio.write_tags()
