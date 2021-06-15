@@ -95,10 +95,18 @@ def cli(file, files_directory, from_file, album, albumartist, artist, comment,
     }
 
     if from_file is not None:
-        tags, file, files_directory = parse_from_file(tags,
-                                                      file,
-                                                      files_directory,
-                                                      from_file)
+        (tags,
+         file,
+         files_directory,
+         parse_title_capitalize,
+         parse_title_as_is,
+         parse_title_clean) = parse_from_file(tags,
+                                              file,
+                                              files_directory,
+                                              from_file,
+                                              parse_title_capitalize,
+                                              parse_title_as_is,
+                                              parse_title_clean)
 
     file_validation(file, files_directory)
 
@@ -150,20 +158,29 @@ def cli(file, files_directory, from_file, album, albumartist, artist, comment,
         base_audio_wrapper(a_file, **tags_to_set)
 
 
-def parse_from_file(tags, file, files_directory, from_file) -> tuple:
+def parse_from_file(tags: dict,
+                    file: str,
+                    files_directory: str,
+                    from_file: str,
+                    parse_title_capitalize: str,
+                    parse_title_as_is: str,
+                    parse_title_clean: str) -> tuple:
     '''
-    Receives the tags dict, file, and files_directory variables, and
+    Receives the tags dict and
     maps the values from the given text file.
     -----
-    Returns: a tuple (tags, file, files_directory).
+    Returns: a tuple (tags, file, files_directory, parse_title_capitalize
+    parse_title_as_is, title).
     '''
     file_validation(from_file=from_file)
     with open(from_file, 'r') as text_file:
         lines = text_file.readlines()
 
         for line in lines:
-            tmp = line.split("=")
+            tmp = line.split("=", 1)
 
+            # this is for regular tags only
+            # they are added to tags dict
             if tmp[0] in tags.keys():
                 tags[tmp[0]] = tmp[1].strip()
 
@@ -182,7 +199,21 @@ def parse_from_file(tags, file, files_directory, from_file) -> tuple:
             elif tmp[0] == "files-directory":
                 files_directory = tmp[1].strip()
 
-    return(tags, file, files_directory)
+            elif tmp[0] == "parse-title-capitalize":
+                parse_title_capitalize = tmp[1].strip()
+
+            elif tmp[0] == "parse-title-as-is":
+                parse_title_as_is = tmp[1].strip()
+
+            elif tmp[0] == "parse-title-clean":
+                parse_title_clean = tmp[1].strip()
+
+    return(tags,
+           file,
+           files_directory,
+           parse_title_capitalize,
+           parse_title_as_is,
+           parse_title_clean,)
 
 
 def validate_tags_types(**tags_to_set):

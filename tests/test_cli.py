@@ -383,6 +383,96 @@ class TestCli(unittest.TestCase):
         audio.load_track(audio_file)
         self.assertEqual(audio.get_tag("tracktitle"), expected)
 
+    def test_regex_from_file_capitalize(self) -> None:
+        '''
+        When passing a regex expression to extract and capitalize the
+        track title from the actual audio file, using from-file option
+        1. Pass a valid text file with option parse-title-capitalize.
+        2. Pass a valid regex expression.
+        3. The tracktitle tag should be names accordingly.
+        '''
+        pattern = "(?<=\\d\\d).+(?=.mp3)"
+        audio_file = self.path_to_test_files + self.file_delimit +\
+            self.audio_file_3
+        tags_and_values = {
+            "parse-title-capitalize": pattern,
+            "file": audio_file,
+        }
+
+        options = self.to_options(**tags_and_values)
+
+        test_file_txt = self.write_to_test_text_file(*options)
+        runner = CliRunner()
+
+        result = runner.invoke(cli, ["--from-file", test_file_txt])
+
+        expected = "_Audio_Test_File_3"
+
+        self.assertEqual(result.exit_code, 0)
+        audio = base_audio.BaseAudio()
+        audio.load_track(audio_file)
+        self.assertEqual(audio.get_tag("tracktitle"), expected)
+
+    def test_regex_from_file_as_is(self) -> None:
+        '''
+        When passing a regex expression to extract as is the
+        track title from the actual audio file, using from-file option
+        1. Pass a valid text file with option parse-title-capitalize.
+        2. Pass a valid regex expression.
+        3. The tracktitle tag should be names accordingly.
+        '''
+        pattern = "(?<=\\d\\d).+(?=.mp3)"
+        audio_file = self.path_to_test_files + self.file_delimit +\
+            self.audio_file_3
+        tags_and_values = {
+            "parse-title-as-is": pattern,
+            "file": audio_file,
+        }
+
+        options = self.to_options(**tags_and_values)
+
+        test_file_txt = self.write_to_test_text_file(*options)
+        runner = CliRunner()
+
+        result = runner.invoke(cli, ["--from-file", test_file_txt])
+
+        expected = "_audio_test_file_3"
+
+        self.assertEqual(result.exit_code, 0)
+        audio = base_audio.BaseAudio()
+        audio.load_track(audio_file)
+        self.assertEqual(audio.get_tag("tracktitle"), expected)
+
+    def test_regex_from_file_clean_and_capitalize(self) -> None:
+        '''
+        When passing a regex expression to extract as is the
+        track title from the actual audio file, using from-file option
+        1. Pass a valid text file with option parse-title-capitalize.
+        2. Pass a valid regex expression.
+        3. The tracktitle tag should be names accordingly.
+        '''
+        pattern = "(?<=\\d\\d).+(?=.mp3)"
+        audio_file = self.path_to_test_files + self.file_delimit +\
+            self.audio_file_3
+        tags_and_values = {
+            "parse-title-clean": pattern,
+            "file": audio_file,
+        }
+
+        options = self.to_options(**tags_and_values)
+
+        test_file_txt = self.write_to_test_text_file(*options)
+        runner = CliRunner()
+
+        result = runner.invoke(cli, ["--from-file", test_file_txt])
+
+        expected = "Audio Test File 3"
+
+        self.assertEqual(result.exit_code, 0)
+        audio = base_audio.BaseAudio()
+        audio.load_track(audio_file)
+        self.assertEqual(audio.get_tag("tracktitle"), expected)
+
     def to_options(self, **tags_and_values) -> list:
         '''
         Receives a dictionary of 'tag: value' pair and creates a list from
