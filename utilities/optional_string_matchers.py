@@ -117,3 +117,30 @@ class OptionalStringMatchers:
                                                            pattern)
         clean_string = clean_string.strip()
         return clean_string
+
+    def extract_track_number(self, file_name: str, pattern: str) -> int:
+        '''
+        Receives the name of the file, looks for a number that matches
+        the given pattern, extracts the str and parses it into an int.
+        If no valid match is found, returns 0.
+        -----
+        Raises a TypeError if tha matching object cannot be parsed to int.\n
+        Raises an Exception if something else happens.
+        '''
+        track_number = 0
+
+        match = search(pattern, file_name)
+        if match:
+            try:
+
+                track_number = int(match.group(0))
+
+            except TypeError as e:
+                msg = "Encountered an exception when trying to convert the" +\
+                      " track number to a number: "
+                raise TypeError(msg) from e
+            except Exception as e:
+                msg = "Something went wrong when extracting track number:"
+                raise Exception(msg) from e
+
+        return track_number

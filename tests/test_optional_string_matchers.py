@@ -106,3 +106,30 @@ class TestOptionalStringMatchers(unittest.TestCase):
                                                                pattern)
 
         self.assertEqual(expected, title)
+
+    def test_extract_track_number(self) -> None:
+        '''
+        1. Given an audio file name.
+        2. And a valid Regex expression.
+        3. Return the track number, it should be a valid int number.
+        '''
+
+        osm = OptionalStringMatchers()
+        file_name = "01 track title.mp3"
+        expected = 1
+        pattern = "\\d+(?=.*\\.mp3)"
+        track_number = osm.extract_track_number(file_name, pattern)
+        self.assertEqual(track_number, expected)
+
+    def test_extract_track_number_no_match(self) -> None:
+        '''
+        1. Given an audio file name with no number.
+        2. And a valid Regex expression.
+        3. If no match is found, assign 0.
+        '''
+        osm = OptionalStringMatchers()
+        file_name = "no number track title.mp3"
+        expected = 0
+        pattern = "\\d+(?=.*\\.mp3)"
+        track_number = osm.extract_track_number(file_name, pattern)
+        self.assertEqual(track_number, expected)
