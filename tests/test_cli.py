@@ -512,6 +512,32 @@ class TestCli(unittest.TestCase):
         actual_number = audio.get_tag("tracknumber")
         self.assertEqual(actual_number, expected)
 
+    def test_regex_number_from_file(self) -> None:
+        '''
+        When passing a regex to extract track number from a valid file.
+        1. Given a valid audio file.
+        2. and a valid regex pattern.
+        3. Extract the track number as a number type.
+        '''
+        pattern = "\\d+(?=.+\\.mp3)"
+        audio_file = self.path_to_test_files + self.file_delimit +\
+                     self.audio_file_3
+        expected = 1
+        tags_and_values = {
+            "parse-track_number": pattern,
+            "file": audio_file,
+        }
+
+        options = self.to_options(**tags_and_values)
+
+        test_file_txt = self.write_to_test_text_file(*options)
+        runner = CliRunner()
+        result = runner.invoke(cli, ["--from-file", test_file_txt])
+        self.assertEqual(result.exit_code, 0)
+        audio = base_audio.BaseAudio()
+        audio.load_track(audio_file)
+        self.assertEqual(audio.get_tag("tracknumber"), expected)
+
     def to_options(self, **tags_and_values) -> list:
         '''
         Receives a dictionary of 'tag: value' pair and creates a list from

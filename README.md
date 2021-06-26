@@ -107,3 +107,4 @@ Ypu can also get the track number from the audio file using regex:
 py main.py --file "path\to\39_audio_test_file_3.mp3" --parse-track-number "\d+(?=.+\1.mp3)"
 ```
 track number gets tagged as 39.
+If no match is found, 0 i assigned by default.
