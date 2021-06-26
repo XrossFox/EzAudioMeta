@@ -1,5 +1,6 @@
 from re import search
 from re import sub
+from re import error
 
 
 class OptionalStringMatchers:
@@ -55,6 +56,7 @@ class OptionalStringMatchers:
         coordinate junctions and proposotions that are less than 5 letters
         long.
         '''
+        print(file_name)
         track_title = search(pattern, file_name).group(0)
         list_words = track_title.split(" ")
 
@@ -124,23 +126,20 @@ class OptionalStringMatchers:
         the given pattern, extracts the str and parses it into an int.
         If no valid match is found, returns 0.
         -----
+        Raises an re.error if an invalid regex is received\n
         Raises a TypeError if tha matching object cannot be parsed to int.\n
         Raises an Exception if something else happens.
         '''
         track_number = 0
-
-        match = search(pattern, file_name)
+        try:
+            match = search(pattern, file_name)
+        except error as e:
+            print("Error in regex:" + pattern + ":" + e.msg)
+            exit(1)
         if match:
             try:
-
                 track_number = int(match.group(0))
-
-            except TypeError as e:
-                msg = "Encountered an exception when trying to convert the" +\
-                      " track number to a number: "
-                raise TypeError(msg) from e
-            except Exception as e:
-                msg = "Something went wrong when extracting track number:"
-                raise Exception(msg) from e
-
+            except ValueError as e:
+                print("Not a number: " + str(e))
+                exit(1)
         return track_number

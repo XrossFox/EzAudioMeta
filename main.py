@@ -21,22 +21,19 @@ elif platform.startswith("linux"):
 parse_cap_help = "Parses the 'tracktitle' from the actual file name." +\
     " The track title is capitalized as a title." +\
     " You must provide a valid regex expresion." +\
-    " Overrides 'tracktitle' option." + " NOTE: please escape all '\\' as" +\
-    " '\\\\', otherwise Regex engine might complain." +\
-    " Ej. (?<=\\\\d\\\\d\\\\s).+(?=\\\\.flac)."
+    " Ej. (?<=\\d\d\\s).+(?=\\.flac)."
 parse_asis_help = "Parses the 'tracktitle' from the actual file name." +\
     " The track title is left as is with no capitalization or processing." +\
     " You must provide a valid regex expresion." +\
-    " Overrides 'tracktitle' option." + " NOTE: please escape all '\\' as" +\
-    " '\\\\', otherwise Regex engine might complain." +\
-    " Ej. (?<=\\\\d\\\\d\\\\s).+(?=\\\\.flac)."
+    " Ej. (?<=\\d\\d\\s).+(?=\\.flac)."
 parse_clean_help = "Parses the 'tracktitle' from the actual file name." +\
     " The track title has all '-', '_' and multiple whitespaces" +\
     "removed and trimmed, and then is title capitalized." +\
     " You must provide a valid regex expresion." +\
-    " Overrides 'tracktitle' option." + " NOTE: please escape all '\\' as" +\
-    " '\\\\', otherwise Regex engine might complain." +\
-    " Ej. (?<=\\\\d\\\\d\\\\s).+(?=\\\\.flac)."
+    " Ej. (?<=\\d\\d\\s).+(?=\\.flac)."
+parse_track_number = "Parses the 'tracknumber' from the actual file name." +\
+    " You must provide a valid regex expresion." +\
+    " Ej. \\d+(?=.+\\.mp3)."
 
 _op_str_matchers = OptionalStringMatchers()
 
@@ -63,12 +60,13 @@ _op_str_matchers = OptionalStringMatchers()
 @click.option('--parse-title-capitalize', type=str, help=parse_cap_help)
 @click.option('--parse-title-as-is', type=str, help=parse_asis_help)
 @click.option('--parse-title-clean', type=str, help=parse_clean_help)
+@click.option('--parse-track-number', type=str, help=parse_track_number)
 def cli(file, files_directory, from_file, album, albumartist, artist, comment,
         compilation,
         composer, discnumber, genre, lyrics,
         totaldiscs, totaltracks,
         tracknumber, tracktitle, year, isrc, parse_title_capitalize,
-        parse_title_as_is, parse_title_clean):
+        parse_title_as_is, parse_title_clean, parse_track_number):
     '''
     This CLI application receives an audio file and the tags that are to be
     setted/changed. Most tags are expected to be character
@@ -126,7 +124,8 @@ def cli(file, files_directory, from_file, album, albumartist, artist, comment,
 
     tags_validation((parse_title_as_is
                     or parse_title_capitalize
-                    or parse_title_clean), **tags)
+                    or parse_title_clean),
+                    parse_track_number, **tags)
 
     tags_to_set = actual_tags(**tags)
 
@@ -154,6 +153,11 @@ def cli(file, files_directory, from_file, album, albumartist, artist, comment,
                     a_file,
                     parse_title_clean
                 )
+
+        if parse_track_number:
+            tags_to_set["tracknumber"] =\
+                _op_str_matchers.extract_track_number(a_file,
+                                                      parse_track_number)
 
         base_audio_wrapper(a_file, **tags_to_set)
 
@@ -240,7 +244,8 @@ def actual_tags(**tags) -> dict:
     return tags_to_set
 
 
-def tags_validation(parse_title_enabled: bool = None, **tags) -> None:
+def tags_validation(parse_title_enabled: bool,
+                    parse_track_number: bool, **tags) -> None:
     '''
     Checks that there is at least 1 tag set, title parser is enabled or
     else terminates the process with 0.
@@ -251,7 +256,7 @@ def tags_validation(parse_title_enabled: bool = None, **tags) -> None:
         if tags[key] is not None:
             all_none = False
 
-    if parse_title_enabled:
+    if parse_title_enabled or parse_track_number:
         all_none = False
 
     if all_none:
