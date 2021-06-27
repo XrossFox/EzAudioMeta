@@ -1,5 +1,6 @@
 # EzAudioMeta
-WIP
+[![Build Status](https://travis-ci.com/XrossFox/EzAudioMeta.svg?branch=main)](https://travis-ci.com/XrossFox/EzAudioMeta)
+[![Build Status](https://travis-ci.com/XrossFox/EzAudioMeta.svg?branch=dev)](https://travis-ci.com/XrossFox/EzAudioMeta)
 
 Python Script that allows you to re-name meta data fields from audio files in a
 directory.
