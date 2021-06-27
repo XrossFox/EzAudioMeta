@@ -20,6 +20,11 @@ class TestCli(unittest.TestCase):
         self.path_to_test_files = \
             str(self.current_directory) + self.file_delimit + "test_files"
 
+        # audio files constant name declaration
+        self.audio_file_1 = "audio_file_1.mp3"
+        self.audio_file_2 = "audio_file_2.mp3"
+        self.audio_file_3 = "01_audio_test_file_3.mp3"
+
         self.reset_default_tags()
 
     def tearDown(self) -> None:
@@ -302,6 +307,346 @@ class TestCli(unittest.TestCase):
         self.assertEqual(result.exit_code, 1)
         self.assertEqual(result.output, f"{inv} is not a valid file\n")
 
+    def test_extract_title_title_capitalize(self) -> None:
+        '''
+        When passing a regex expression to extract and capitalize the
+        track title from the actual audio file,
+        1. Pass a valid audio file.
+        2. Pass a valid regex expression.
+        3. The tracktitle tag should be names accordingly.
+        '''
+        runner = CliRunner()
+        audio_file = self.path_to_test_files + self.file_delimit +\
+            self.audio_file_3
+
+        pattern = "(?<=\\d\\d).+(?=.mp3)"
+
+        result = runner.invoke(cli, ["--file", audio_file,
+                                     "--parse-title-capitalize", pattern]
+                               )
+
+        expected = "_Audio_Test_File_3"
+
+        self.assertEqual(result.exit_code, 0)
+        audio = base_audio.BaseAudio()
+        audio.load_track(audio_file)
+        self.assertEqual(audio.get_tag("tracktitle"), expected)
+
+    def test_extract_title_title_as_is(self) -> None:
+        '''
+        When passing a regex expression to extract as is the
+        track title from the actual audio file,
+        1. Pass a valid audio file.
+        2. Pass a valid regex expression.
+        3. The tracktitle tag should be named as it appears in title.
+        '''
+        runner = CliRunner()
+        audio_file = self.path_to_test_files + self.file_delimit +\
+            self.audio_file_3
+
+        pattern = "(?<=\\d\\d).+(?=.mp3)"
+
+        result = runner.invoke(cli, ["--file", audio_file,
+                                     "--parse-title-as-is", pattern]
+                               )
+
+        expected = "_audio_test_file_3"
+
+        self.assertEqual(result.exit_code, 0)
+        audio = base_audio.BaseAudio()
+        audio.load_track(audio_file)
+        self.assertEqual(audio.get_tag("tracktitle"), expected)
+
+    def test_extract_title_cleanup_and_capitalize(self) -> None:
+        '''
+        When passing a regex expression to extract, cleanup and Capitalize
+        track title from the actual audio file,
+        1. Pass a valid audio file.
+        2. Pass a valid regex expression.
+        3. The tracktitle tag should be named without "-", "_" and multiples
+        white spaces.
+        '''
+        runner = CliRunner()
+        audio_file = self.path_to_test_files + self.file_delimit +\
+            self.audio_file_3
+
+        pattern = "(?<=\\d\\d).+(?=.mp3)"
+
+        result = runner.invoke(cli, ["--file", audio_file,
+                                     "--parse-title-clean", pattern]
+                               )
+
+        expected = "Audio Test File 3"
+
+        self.assertEqual(result.exit_code, 0)
+        audio = base_audio.BaseAudio()
+        audio.load_track(audio_file)
+        self.assertEqual(audio.get_tag("tracktitle"), expected)
+
+    def test_regex_from_file_capitalize(self) -> None:
+        '''
+        When passing a regex expression to extract and capitalize the
+        track title from the actual audio file, using from-file option
+        1. Pass a valid text file with option parse-title-capitalize.
+        2. Pass a valid regex expression.
+        3. The tracktitle tag should be names accordingly.
+        '''
+        pattern = "(?<=\\d\\d).+(?=.mp3)"
+        audio_file = self.path_to_test_files + self.file_delimit +\
+            self.audio_file_3
+        tags_and_values = {
+            "parse-title-capitalize": pattern,
+            "file": audio_file,
+        }
+
+        options = self.to_options(**tags_and_values)
+
+        test_file_txt = self.write_to_test_text_file(*options)
+        runner = CliRunner()
+
+        result = runner.invoke(cli, ["--from-file", test_file_txt])
+
+        expected = "_Audio_Test_File_3"
+
+        self.assertEqual(result.exit_code, 0)
+        audio = base_audio.BaseAudio()
+        audio.load_track(audio_file)
+        self.assertEqual(audio.get_tag("tracktitle"), expected)
+
+    def test_regex_from_file_as_is(self) -> None:
+        '''
+        When passing a regex expression to extract as is the
+        track title from the actual audio file, using from-file option
+        1. Pass a valid text file with option parse-title-capitalize.
+        2. Pass a valid regex expression.
+        3. The tracktitle tag should be names accordingly.
+        '''
+        pattern = "(?<=\\d\\d).+(?=.mp3)"
+        audio_file = self.path_to_test_files + self.file_delimit +\
+            self.audio_file_3
+        tags_and_values = {
+            "parse-title-as-is": pattern,
+            "file": audio_file,
+        }
+
+        options = self.to_options(**tags_and_values)
+
+        test_file_txt = self.write_to_test_text_file(*options)
+        runner = CliRunner()
+
+        result = runner.invoke(cli, ["--from-file", test_file_txt])
+
+        expected = "_audio_test_file_3"
+
+        self.assertEqual(result.exit_code, 0)
+        audio = base_audio.BaseAudio()
+        audio.load_track(audio_file)
+        self.assertEqual(audio.get_tag("tracktitle"), expected)
+
+    def test_regex_from_file_clean_and_capitalize(self) -> None:
+        '''
+        When passing a regex expression to extract as is the
+        track title from the actual audio file, using from-file option
+        1. Pass a valid text file with option parse-title-capitalize.
+        2. Pass a valid regex expression.
+        3. The tracktitle tag should be names accordingly.
+        '''
+        pattern = "(?<=\\d\\d).+(?=.mp3)"
+        audio_file = self.path_to_test_files + self.file_delimit +\
+            self.audio_file_3
+        tags_and_values = {
+            "parse-title-clean": pattern,
+            "file": audio_file,
+        }
+
+        options = self.to_options(**tags_and_values)
+
+        test_file_txt = self.write_to_test_text_file(*options)
+        runner = CliRunner()
+
+        result = runner.invoke(cli, ["--from-file", test_file_txt])
+
+        expected = "Audio Test File 3"
+
+        self.assertEqual(result.exit_code, 0)
+        audio = base_audio.BaseAudio()
+        audio.load_track(audio_file)
+        self.assertEqual(audio.get_tag("tracktitle"), expected)
+
+    def test_regex_number_file(self) -> None:
+        '''
+        When passing a regex to extract track number from a valid file.
+        1. Given a valid audio file.
+        2. and a valid regex pattern.
+        3. Extract the track number as a number type.
+        '''
+        pattern = "\\d+(?=.+\\.mp3)"
+        audio_file =\
+            self.path_to_test_files +\
+            self.file_delimit +\
+            self.audio_file_3
+        expected = 1
+        runner = CliRunner()
+        result = runner.invoke(cli, ["--file", audio_file,
+                                     "--parse-track-number", pattern])
+        self.assertEqual(result.exit_code, 0)
+        audio = base_audio.BaseAudio()
+        audio.load_track(audio_file)
+        self.assertEqual(audio.get_tag("tracknumber"), expected)
+
+    def test_regex_number_directory(self) -> None:
+        '''
+        When passing a regex to extract track number from a directory
+        with valid audio files.
+        1. Given a directory with valid audio files.
+        2. and a valid regex pattern.
+        3. Extract the track number as a number type.
+        '''
+        pattern = "(?<=_)\\d+(?=\\.mp3)"
+
+        # directory and individual files
+        audio_directory = self.path_to_test_files
+        first_f =\
+            self.path_to_test_files +\
+            self.file_delimit +\
+            self.audio_file_3
+        second_f =\
+            self.path_to_test_files +\
+            self.file_delimit +\
+            self.audio_file_1
+        third_f =\
+            self.path_to_test_files +\
+            self.file_delimit +\
+            self.audio_file_2
+
+        # expected track numbers
+        expected1 = 3
+        expected2 = 1
+        expected3 = 2
+
+        runner = CliRunner()
+        result = runner.invoke(cli, ["--files-directory", audio_directory,
+                                     "--parse-track-number", pattern])
+
+        self.assertEqual(result.exit_code, 0)
+
+        audio = base_audio.BaseAudio()
+
+        # expected 1
+        audio.load_track(first_f)
+        self.assertEqual(audio.get_tag("tracknumber"), expected1)
+        # expected 2
+        audio.load_track(second_f)
+        self.assertEqual(audio.get_tag("tracknumber"), expected2)
+        # expected 3
+        audio.load_track(third_f)
+        self.assertEqual(audio.get_tag("tracknumber"), expected3)
+
+    def test_regex_number_file_no_number_in_title(self) -> None:
+        '''
+        When passing a regex to extract track number from a valid file.
+        1. Given a valid audio file with no track number in title.
+        2. and a valid regex pattern.
+        3. Extract the track number as 0 number type.
+        '''
+        pattern = "\\d+(?=.+\\.mp3)"
+        audio_file =\
+            self.path_to_test_files +\
+            self.file_delimit +\
+            self.audio_file_1
+        expected = 0
+        runner = CliRunner()
+        result = runner.invoke(cli, ["--parse-track-number", pattern,
+                                     "--file", audio_file])
+        self.assertEqual(result.exit_code, 0)
+        audio = base_audio.BaseAudio()
+        audio.load_track(audio_file)
+        actual_number = audio.get_tag("tracknumber")
+        self.assertEqual(actual_number, expected)
+
+    def test_regex_number_from_file(self) -> None:
+        '''
+        When passing a regex to extract track number from a valid file.
+        1. Given a valid audio file.
+        2. and a valid regex pattern.
+        3. Extract the track number as a number type.
+        '''
+        pattern = "\\d+(?=.+\\.mp3)"
+        audio_file =\
+            self.path_to_test_files +\
+            self.file_delimit +\
+            self.audio_file_3
+        expected = 1
+        tags_and_values = {
+            "parse-track_number": pattern,
+            "file": audio_file,
+        }
+
+        options = self.to_options(**tags_and_values)
+
+        test_file_txt = self.write_to_test_text_file(*options)
+        runner = CliRunner()
+        result = runner.invoke(cli, ["--from-file", test_file_txt])
+        self.assertEqual(result.exit_code, 0)
+        audio = base_audio.BaseAudio()
+        audio.load_track(audio_file)
+        self.assertEqual(audio.get_tag("tracknumber"), expected)
+
+    def test_regex_number_from_file_directory(self) -> None:
+        '''
+        When passing a regex to extract track number from a valid file.
+        1. Given a valid audio file.
+        2. and a valid regex pattern.
+        3. Extract the track number as a number type.
+        '''
+        pattern = "(?<=_)\\d+(?=\\.mp3)"
+
+        # directory and individual files
+        audio_directory = self.path_to_test_files
+        first_f =\
+            self.path_to_test_files +\
+            self.file_delimit +\
+            self.audio_file_3
+        second_f =\
+            self.path_to_test_files +\
+            self.file_delimit +\
+            self.audio_file_1
+        third_f =\
+            self.path_to_test_files +\
+            self.file_delimit +\
+            self.audio_file_2
+
+        # expected track numbers
+        expected1 = 3
+        expected2 = 1
+        expected3 = 2
+
+        # options for runner
+        tags_and_values = {
+            "parse-track-number": pattern,
+            "files-directory": audio_directory,
+        }
+        options = self.to_options(**tags_and_values)
+        test_file_txt = self.write_to_test_text_file(*options)
+
+        # runner
+        runner = CliRunner()
+        result = runner.invoke(cli, ["--from-file", test_file_txt])
+
+        self.assertEqual(result.exit_code, 0)
+
+        audio = base_audio.BaseAudio()
+
+        # expected 1
+        audio.load_track(first_f)
+        self.assertEqual(audio.get_tag("tracknumber"), expected1)
+        # expected 2
+        audio.load_track(second_f)
+        self.assertEqual(audio.get_tag("tracknumber"), expected2)
+        # expected 3
+        audio.load_track(third_f)
+        self.assertEqual(audio.get_tag("tracknumber"), expected3)
+
     def to_options(self, **tags_and_values) -> list:
         '''
         Receives a dictionary of 'tag: value' pair and creates a list from
@@ -355,4 +700,14 @@ class TestCli(unittest.TestCase):
         ba_audio.set_tag("tracknumber", 1)
         ba_audio.set_tag("title",
                          "Let Go of Time (and Time Will Let Go of You)")
+
+        audio_file = \
+            self.path_to_test_files + self.file_delimit + self.audio_file_3
+        ba_audio = base_audio.BaseAudio()
+        ba_audio.load_track(audio_file)
+        ba_audio.set_tag("artist", "Unknown")
+        ba_audio.set_tag("album", "Unknown")
+        ba_audio.set_tag("tracknumber", 1)
+        ba_audio.set_tag("title",
+                         "Unknown")
         ba_audio.write_tags()

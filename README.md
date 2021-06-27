@@ -1,5 +1,6 @@
 # EzAudioMeta
-WIP
+[![Build Status](https://travis-ci.com/XrossFox/EzAudioMeta.svg?branch=main)](https://travis-ci.com/XrossFox/EzAudioMeta)
+[![Build Status](https://travis-ci.com/XrossFox/EzAudioMeta.svg?branch=dev)](https://travis-ci.com/XrossFox/EzAudioMeta)
 
 Python Script that allows you to re-name meta data fields from audio files in a
 directory.
@@ -40,6 +41,27 @@ encased between double quotes.
   --tracktitle TEXT
   --year INTEGER
   --isrc TEXT
+  --parse-title-capitalize TEXT  Parses the 'tracktitle' from the actual file
+                                 name. The track title is capitalized as a
+                                 title. You must provide a valid regex
+                                 expresion. Ej. (?<=\d\d\s).+(?=\.flac).
+
+  --parse-title-as-is TEXT       Parses the 'tracktitle' from the actual file
+                                 name. The track title is left as is with no
+                                 capitalization or processing. You must
+                                 provide a valid regex expresion. Ej.
+                                 (?<=\d\d\s).+(?=\.flac).
+
+  --parse-title-clean TEXT       Parses the 'tracktitle' from the actual file
+                                 name. The track title has all '-', '_' and
+                                 multiple whitespacesremoved and trimmed, and
+                                 then is title capitalized. You must provide a
+                                 valid regex expresion. Ej.
+                                 (?<=\d\d\s).+(?=\.flac).
+
+  --parse-track-number TEXT      Parses the 'tracknumber' from the actual file
+                                 name. You must provide a valid regex
+                                 expresion. Ej. \d+(?=.+\.mp3).
   --help                 Show this message and exit.
 ```
 #### Single file as an example: 
@@ -68,3 +90,22 @@ You should call the script like this:
 ```bash
 py main.py --from-file "path/to/your/text/file.txt"
 ```
+
+#### Parsing track titles from file name using Regex.
+EzAudioMeta allows to parse the 'tracktitle' tag from the actual file name using regular expressions. Usage is as follows 
+```bash
+py main.py --from-file "path/to/your/text/file.txt" --parse-title-capitalize "(?<=\d\d\s).+(?=\.flac)"
+```
+Given an audio file `01 my_track_title.flac`, the expected result should be:
+
+- `--parse-title-capitalize`: My_Track_Title
+- `--parse-title-as-is`: my_track_title
+- `--parse-title-clean`: My Track Title
+
+#### Parsing track number from file using regex.
+Ypu can also get the track number from the audio file using regex:
+```bash
+py main.py --file "path\to\39_audio_test_file_3.mp3" --parse-track-number "\d+(?=.+\1.mp3)"
+```
+track number gets tagged as 39.
+If no match is found, 0 i assigned by default.
