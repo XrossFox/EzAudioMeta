@@ -481,8 +481,10 @@ class TestCli(unittest.TestCase):
         3. Extract the track number as a number type.
         '''
         pattern = "\\d+(?=.+\\.mp3)"
-        audio_file = self.path_to_test_files + self.file_delimit +\
-                     self.audio_file_3
+        audio_file =\
+            self.path_to_test_files +\
+            self.file_delimit +\
+            self.audio_file_3
         expected = 1
         runner = CliRunner()
         result = runner.invoke(cli, ["--file", audio_file,
@@ -492,6 +494,54 @@ class TestCli(unittest.TestCase):
         audio.load_track(audio_file)
         self.assertEqual(audio.get_tag("tracknumber"), expected)
 
+    def test_regex_number_directory(self) -> None:
+        '''
+        When passing a regex to extract track number from a directory
+        with valid audio files.
+        1. Given a directory with valid audio files.
+        2. and a valid regex pattern.
+        3. Extract the track number as a number type.
+        '''
+        pattern = "(?<=_)\\d+(?=\\.mp3)"
+
+        # directory and individual files
+        audio_directory = self.path_to_test_files
+        first_f =\
+            self.path_to_test_files +\
+            self.file_delimit +\
+            self.audio_file_3
+        second_f =\
+            self.path_to_test_files +\
+            self.file_delimit +\
+            self.audio_file_1
+        third_f =\
+            self.path_to_test_files +\
+            self.file_delimit +\
+            self.audio_file_2
+
+        # expected track numbers
+        expected1 = 3
+        expected2 = 1
+        expected3 = 2
+
+        runner = CliRunner()
+        result = runner.invoke(cli, ["--files-directory", audio_directory,
+                                     "--parse-track-number", pattern])
+
+        self.assertEqual(result.exit_code, 0)
+
+        audio = base_audio.BaseAudio()
+
+        # expected 1
+        audio.load_track(first_f)
+        self.assertEqual(audio.get_tag("tracknumber"), expected1)
+        # expected 2
+        audio.load_track(second_f)
+        self.assertEqual(audio.get_tag("tracknumber"), expected2)
+        # expected 3
+        audio.load_track(third_f)
+        self.assertEqual(audio.get_tag("tracknumber"), expected3)
+
     def test_regex_number_file_no_number_in_title(self) -> None:
         '''
         When passing a regex to extract track number from a valid file.
@@ -500,8 +550,10 @@ class TestCli(unittest.TestCase):
         3. Extract the track number as 0 number type.
         '''
         pattern = "\\d+(?=.+\\.mp3)"
-        audio_file = self.path_to_test_files + self.file_delimit +\
-                     self.audio_file_1
+        audio_file =\
+            self.path_to_test_files +\
+            self.file_delimit +\
+            self.audio_file_1
         expected = 0
         runner = CliRunner()
         result = runner.invoke(cli, ["--parse-track-number", pattern,
@@ -520,8 +572,10 @@ class TestCli(unittest.TestCase):
         3. Extract the track number as a number type.
         '''
         pattern = "\\d+(?=.+\\.mp3)"
-        audio_file = self.path_to_test_files + self.file_delimit +\
-                     self.audio_file_3
+        audio_file =\
+            self.path_to_test_files +\
+            self.file_delimit +\
+            self.audio_file_3
         expected = 1
         tags_and_values = {
             "parse-track_number": pattern,
@@ -537,6 +591,61 @@ class TestCli(unittest.TestCase):
         audio = base_audio.BaseAudio()
         audio.load_track(audio_file)
         self.assertEqual(audio.get_tag("tracknumber"), expected)
+
+    def test_regex_number_from_file_directory(self) -> None:
+        '''
+        When passing a regex to extract track number from a valid file.
+        1. Given a valid audio file.
+        2. and a valid regex pattern.
+        3. Extract the track number as a number type.
+        '''
+        pattern = "(?<=_)\\d+(?=\\.mp3)"
+
+        # directory and individual files
+        audio_directory = self.path_to_test_files
+        first_f =\
+            self.path_to_test_files +\
+            self.file_delimit +\
+            self.audio_file_3
+        second_f =\
+            self.path_to_test_files +\
+            self.file_delimit +\
+            self.audio_file_1
+        third_f =\
+            self.path_to_test_files +\
+            self.file_delimit +\
+            self.audio_file_2
+
+        # expected track numbers
+        expected1 = 3
+        expected2 = 1
+        expected3 = 2
+
+        # options for runner
+        tags_and_values = {
+            "parse-track-number": pattern,
+            "files-directory": audio_directory,
+        }
+        options = self.to_options(**tags_and_values)
+        test_file_txt = self.write_to_test_text_file(*options)
+
+        # runner
+        runner = CliRunner()
+        result = runner.invoke(cli, ["--from-file", test_file_txt])
+
+        self.assertEqual(result.exit_code, 0)
+
+        audio = base_audio.BaseAudio()
+
+        # expected 1
+        audio.load_track(first_f)
+        self.assertEqual(audio.get_tag("tracknumber"), expected1)
+        # expected 2
+        audio.load_track(second_f)
+        self.assertEqual(audio.get_tag("tracknumber"), expected2)
+        # expected 3
+        audio.load_track(third_f)
+        self.assertEqual(audio.get_tag("tracknumber"), expected3)
 
     def to_options(self, **tags_and_values) -> list:
         '''

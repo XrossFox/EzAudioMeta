@@ -56,7 +56,6 @@ class OptionalStringMatchers:
         coordinate junctions and proposotions that are less than 5 letters
         long.
         '''
-        print(file_name)
         track_title = search(pattern, file_name).group(0)
         list_words = track_title.split(" ")
 

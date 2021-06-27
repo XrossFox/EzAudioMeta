@@ -21,7 +21,7 @@ elif platform.startswith("linux"):
 parse_cap_help = "Parses the 'tracktitle' from the actual file name." +\
     " The track title is capitalized as a title." +\
     " You must provide a valid regex expresion." +\
-    " Ej. (?<=\\d\d\\s).+(?=\\.flac)."
+    " Ej. (?<=\\d\\d\\s).+(?=\\.flac)."
 parse_asis_help = "Parses the 'tracktitle' from the actual file name." +\
     " The track title is left as is with no capitalization or processing." +\
     " You must provide a valid regex expresion." +\
@@ -98,13 +98,15 @@ def cli(file, files_directory, from_file, album, albumartist, artist, comment,
          files_directory,
          parse_title_capitalize,
          parse_title_as_is,
-         parse_title_clean) = parse_from_file(tags,
-                                              file,
-                                              files_directory,
-                                              from_file,
-                                              parse_title_capitalize,
-                                              parse_title_as_is,
-                                              parse_title_clean)
+         parse_title_clean,
+         parse_track_number) = parse_from_file(tags,
+                                               file,
+                                               files_directory,
+                                               from_file,
+                                               parse_title_capitalize,
+                                               parse_title_as_is,
+                                               parse_title_clean,
+                                               parse_track_number)
 
     file_validation(file, files_directory)
 
@@ -139,8 +141,9 @@ def cli(file, files_directory, from_file, album, albumartist, artist, comment,
         # update before setting the tags to file.
         if parse_title_capitalize:
             tags_to_set["tracktitle"] =\
-                 _op_str_matchers.extract_track_title_capitalize(a_file,
-                                                        parse_title_capitalize)
+                 _op_str_matchers.\
+                 extract_track_title_capitalize(a_file,
+                                                parse_title_capitalize)
 
         if parse_title_as_is:
             tags_to_set["tracktitle"] =\
@@ -168,7 +171,8 @@ def parse_from_file(tags: dict,
                     from_file: str,
                     parse_title_capitalize: str,
                     parse_title_as_is: str,
-                    parse_title_clean: str) -> tuple:
+                    parse_title_clean: str,
+                    parse_track_number: str) -> tuple:
     '''
     Receives the tags dict and
     maps the values from the given text file.
@@ -212,12 +216,16 @@ def parse_from_file(tags: dict,
             elif tmp[0] == "parse-title-clean":
                 parse_title_clean = tmp[1].strip()
 
+            elif tmp[0] == "parse-track-number":
+                parse_track_number = tmp[1].strip()
+
     return(tags,
            file,
            files_directory,
            parse_title_capitalize,
            parse_title_as_is,
-           parse_title_clean,)
+           parse_title_clean,
+           parse_track_number)
 
 
 def validate_tags_types(**tags_to_set):

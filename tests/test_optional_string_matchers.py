@@ -16,7 +16,7 @@ class TestOptionalStringMatchers(unittest.TestCase):
         pattern = "(?<=[0-9]\\s).+(?=\\.flac)"
         expected = "Of Lillies And Remains"
         track_title = osm.extract_track_title_as_is(file_name, pattern)
-        self.assertEquals(expected, track_title)
+        self.assertEqual(expected, track_title)
 
     def test_extract_track_title_title_case_1(self) -> None:
         pass
@@ -35,7 +35,7 @@ class TestOptionalStringMatchers(unittest.TestCase):
         track_title = osm.extract_track_title_capitalize(file_name,
                                                          pattern)
 
-        self.assertEquals(expected, track_title)
+        self.assertEqual(expected, track_title)
 
     def test_extract_track_title_title_case_2(self) -> None:
         pass
@@ -54,7 +54,7 @@ class TestOptionalStringMatchers(unittest.TestCase):
         track_title = osm.extract_track_title_capitalize(file_name,
                                                          pattern)
 
-        self.assertEquals(expected, track_title)
+        self.assertEqual(expected, track_title)
 
     def test_extract_track_title_title_case_3(self) -> None:
         pass
@@ -73,7 +73,7 @@ class TestOptionalStringMatchers(unittest.TestCase):
         track_title = osm.extract_track_title_capitalize(file_name,
                                                          pattern)
 
-        self.assertEquals(expected, track_title)
+        self.assertEqual(expected, track_title)
 
     def test_extract_track_title_as_is_1(self) -> None:
         '''
