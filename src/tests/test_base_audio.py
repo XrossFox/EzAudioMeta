@@ -1,10 +1,9 @@
 from unittest import TestCase
 from pathlib import Path
 from sys import platform
-
 import mutagen
 
-from audio import base_audio
+from EzAudioMeta.audio import base_audio
 
 
 class TestBaseAudio(TestCase):

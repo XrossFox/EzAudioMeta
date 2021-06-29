@@ -1,6 +1,6 @@
 import unittest
-
-from utilities.optional_string_matchers import OptionalStringMatchers
+from EzAudioMeta.utilities.optional_string_matchers import\
+    OptionalStringMatchers
 
 
 class TestOptionalStringMatchers(unittest.TestCase):

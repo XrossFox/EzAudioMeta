@@ -1,8 +1,10 @@
 from os import path, listdir
 from sys import platform
-from utilities.optional_string_matchers import OptionalStringMatchers
+
 import click
-from audio import base_audio
+from EzAudioMeta.utilities.optional_string_matchers import\
+    OptionalStringMatchers
+from EzAudioMeta.audio import base_audio
 
 str_tags = ["album", "albumartist", "comment", "composer", "genre",
             "lyrics", "tracktitle", "isrc", "artist"]

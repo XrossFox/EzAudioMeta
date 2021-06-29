@@ -15,7 +15,12 @@ the very least-
 - Click 7.1.2.
 
 ### Usage:
+#### For direct usage:
 `py main.py --file path/to/audio/file [options]`
+
+#### Installing from pip:
+`pip install EzAudioMeta`
+`ezaudio --file path/to/audio/file [options]`
 
 ### Options:
 Each option represents a tag to be set. All tags must be either text or a
