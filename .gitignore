@@ -2,4 +2,6 @@
 *.pyc
 env/
 __pycache__/*
-tests/test_files/*.txt
+src/tests/test_files/*.txt
+*.egg-info
+dist/
