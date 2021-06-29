@@ -15,11 +15,16 @@ the very least-
 - Click 7.1.2.
 
 ### Usage:
+
 #### For direct usage:
+
 `py main.py --file path/to/audio/file [options]`
 
 #### Installing from pip:
+
 `pip install EzAudioMeta`
+
+
 `ezaudio --file path/to/audio/file [options]`
 
 ### Options:
@@ -71,12 +76,12 @@ encased between double quotes.
 ```
 #### Single file as an example: 
 ```bash
-py main.py --file "track 01.mp3" --tracktitle "Perreando hasta el suelo"
---tracknumber "12" --album "Lucifer Se Fue De Rumba"
+py main.py --file "track 01.mp3" --tracktitle "Track Title"
+--tracknumber "12" --album "Album Name"
 ```
 #### Directory as an example:
 ```bash
-py main.py --files-directory "path/to/files" --artist "la wea masoquista" --album "lucifer se fue de rumba" --genre "electro cumbia progresiva" --year 1966
+py main.py --files-directory "path/to/files" --artist "Artist" --album "Album Name" --genre "Genre" --year 1966
 ```
 Note: Files are file system dependant, so if you are in windows: `path\to\file` and in linux: `path/to/file`. This script does distinguish between OSes (Windows and Linux so far)
 
