@@ -5,8 +5,8 @@ from random import randrange
 
 from click.testing import CliRunner
 
-from audio import base_audio
-from main import cli
+from EzAudioMeta.audio import base_audio
+from EzAudioMeta.main import cli
 
 
 class TestCli(unittest.TestCase):
