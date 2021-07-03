@@ -2,9 +2,9 @@ from os import path, listdir
 from sys import platform
 
 import click
-from EzAudioMeta.utilities.optional_string_matchers import\
+from utilities.optional_string_matchers import\
     OptionalStringMatchers
-from EzAudioMeta.audio import base_audio
+from audio import base_audio
 
 str_tags = ["album", "albumartist", "comment", "composer", "genre",
             "lyrics", "tracktitle", "isrc", "artist"]
@@ -36,14 +36,16 @@ parse_clean_help = "Parses the 'tracktitle' from the actual file name." +\
 parse_track_number = "Parses the 'tracknumber' from the actual file name." +\
     " You must provide a valid regex expresion." +\
     " Ej. \\d+(?=.+\\.mp3)."
+help_files_dir = "Note: overrides --file option"
+help_from_file = "Note: overrides --file and --files-directory"
 
 _op_str_matchers = OptionalStringMatchers()
 
 
 @click.command()
 @click.option('--file', type=str)
-@click.option('--files-directory', type=str)
-@click.option('--from-file', type=str)
+@click.option('--files-directory', type=str, help=help_files_dir)
+@click.option('--from-file', type=str, help=help_from_file)
 @click.option('--album', type=str)
 @click.option('--albumartist', type=str)
 @click.option('--artist', type=str)
@@ -113,7 +115,7 @@ def cli(file, files_directory, from_file, album, albumartist, artist, comment,
     file_validation(file, files_directory)
 
     # look for all files in dir if valid
-    if files_directory and not file:
+    if files_directory:
         actual_files = list(
                         filter(
                             lambda a: a.split(".")[-1] in valid_extensions,

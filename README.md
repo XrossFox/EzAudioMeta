@@ -33,8 +33,8 @@ tracknumber tag as "15", it will work just fine. For safety, all text should be
 encased between double quotes.
 ```bash
   --file TEXT
-  --files-directory TEXT
-  --from-file TEXT
+  --files-directory TEXT         Note: overrides --file option
+  --from-file TEXT               Note: overrides --file and --files-directory
   --album TEXT
   --albumartist TEXT
   --artist TEXT
