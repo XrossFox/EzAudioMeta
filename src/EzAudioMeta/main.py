@@ -29,8 +29,8 @@ parse_asis_help = "Parses the 'tracktitle' from the actual file name." +\
     " You must provide a valid regex expresion." +\
     " Ej. (?<=\\d\\d\\s).+(?=\\.flac)."
 parse_clean_help = "Parses the 'tracktitle' from the actual file name." +\
-    " The track title has all '-', '_' and multiple whitespaces" +\
-    "removed and trimmed, and then is title capitalized." +\
+    " The track title has all '-', '_' and multiple whitespaces " +\
+    "removed and trimmed, and then it´s 'title capitalized'." +\
     " You must provide a valid regex expresion." +\
     " Ej. (?<=\\d\\d\\s).+(?=\\.flac)."
 parse_track_number = "Parses the 'tracknumber' from the actual file name." +\
