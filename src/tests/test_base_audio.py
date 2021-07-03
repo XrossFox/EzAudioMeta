@@ -4,6 +4,7 @@ from sys import platform
 import mutagen
 
 from EzAudioMeta.audio import base_audio
+import tests.constants as CONS
 
 
 class TestBaseAudio(TestCase):
@@ -15,7 +16,7 @@ class TestBaseAudio(TestCase):
         elif platform.startswith("linux"):
             self.file_delimit = "/"
         self.path_to_test_files = str(self.current_directory) +\
-            self.file_delimit + "test_files"
+            self.file_delimit + CONS.TEST_FILES_DIR
         self.reset_default_tags()
 
     def test_load_track(self) -> None:
@@ -25,7 +26,7 @@ class TestBaseAudio(TestCase):
         2. All tags should be available be visible.
         '''
         audio_file = self.path_to_test_files + self.file_delimit +\
-            "audio_file_1.mp3"
+            CONS.AUDIO_FILE_1
         ba_audio = base_audio.BaseAudio()
         ba_audio.load_track(audio_file)
         self.assertEqual(ba_audio.get_tag("title"), "gloomy sky")
@@ -65,7 +66,7 @@ class TestBaseAudio(TestCase):
         '''
         with self.assertRaises(NotImplementedError):
             audio_file = self.path_to_test_files + self.file_delimit +\
-                "test_file_picture.jpg"
+                CONS.PICTURE_FILE
             ba_audio = base_audio.BaseAudio()
             ba_audio.load_track(audio_file)
 
@@ -78,7 +79,7 @@ class TestBaseAudio(TestCase):
         setted, so it should return the actual title of the file.
         '''
         audio_file = self.path_to_test_files + self.file_delimit +\
-            "audio_file_1.mp3"
+            CONS.AUDIO_FILE_1
         ba_audio = base_audio.BaseAudio()
         ba_audio.load_track(audio_file)
         self.assertEqual(ba_audio.get_tag("title"), "gloomy sky")
@@ -92,7 +93,7 @@ class TestBaseAudio(TestCase):
         setted, so it should return None.
         '''
         audio_file = self.path_to_test_files + self.file_delimit +\
-            "audio_file_1.mp3"
+            CONS.AUDIO_FILE_1
         ba_audio = base_audio.BaseAudio()
         ba_audio.load_track(audio_file)
         self.assertEqual(ba_audio.get_tag("albumartist"), None)
@@ -107,7 +108,7 @@ class TestBaseAudio(TestCase):
         '''
         with self.assertRaises(KeyError):
             audio_file = self.path_to_test_files + self.file_delimit +\
-                "audio_file_1.mp3"
+                CONS.AUDIO_FILE_1
             ba_audio = base_audio.BaseAudio()
             ba_audio.load_track(audio_file)
             self.assertEqual(ba_audio.get_tag("Wolololo!"), None)
@@ -121,7 +122,7 @@ class TestBaseAudio(TestCase):
         been resetted.
         '''
         audio_file = self.path_to_test_files + self.file_delimit +\
-            "audio_file_1.mp3"
+            CONS.AUDIO_FILE_1
         ba_audio = base_audio.BaseAudio()
         ba_audio.load_track(audio_file)
         new_title = "new_title"
@@ -141,7 +142,7 @@ class TestBaseAudio(TestCase):
         '''
         with self.assertRaises(KeyError):
             audio_file = self.path_to_test_files + self.file_delimit +\
-                "audio_file_1.mp3"
+                CONS.AUDIO_FILE_1
             ba_audio = base_audio.BaseAudio()
             ba_audio.load_track(audio_file)
             ba_audio.set_tag("Wolololo!", "this is invalid, my dude")
@@ -155,7 +156,7 @@ class TestBaseAudio(TestCase):
         been setted.
         '''
         audio_file = self.path_to_test_files + self.file_delimit +\
-            "audio_file_1.mp3"
+            CONS.AUDIO_FILE_1
         ba_audio = base_audio.BaseAudio()
         ba_audio.load_track(audio_file)
         new_title = "some album artist"
@@ -176,7 +177,7 @@ class TestBaseAudio(TestCase):
         3. TypeError exception expected.
         '''
         audio_file = self.path_to_test_files + self.file_delimit +\
-            "audio_file_1.mp3"
+            CONS.AUDIO_FILE_1
         ba_audio = base_audio.BaseAudio()
         ba_audio.load_track(audio_file)
         with self.assertRaises(TypeError):
@@ -191,7 +192,7 @@ class TestBaseAudio(TestCase):
         3. TypeError exception expected.
         '''
         audio_file = self.path_to_test_files + self.file_delimit +\
-            "audio_file_1.mp3"
+            CONS.AUDIO_FILE_1
         ba_audio = base_audio.BaseAudio()
         ba_audio.load_track(audio_file)
         with self.assertRaises(TypeError):
@@ -205,7 +206,7 @@ class TestBaseAudio(TestCase):
         2. All tags should be setted.
         '''
         audio_file = self.path_to_test_files + self.file_delimit +\
-            "audio_file_1.mp3"
+            CONS.AUDIO_FILE_1
         ba_audio = base_audio.BaseAudio()
         ba_audio.load_track(audio_file)
 
@@ -242,7 +243,7 @@ class TestBaseAudio(TestCase):
         2. Subset tags should be setted.
         '''
         audio_file = self.path_to_test_files + self.file_delimit +\
-            "audio_file_1.mp3"
+            CONS.AUDIO_FILE_1
         ba_audio = base_audio.BaseAudio()
         ba_audio.load_track(audio_file)
 
@@ -273,7 +274,7 @@ class TestBaseAudio(TestCase):
         3. KeyError exception expected.
         '''
         audio_file = self.path_to_test_files + self.file_delimit +\
-            "audio_file_1.mp3"
+            CONS.AUDIO_FILE_1
         ba_audio = base_audio.BaseAudio()
         ba_audio.load_track(audio_file)
 
@@ -302,7 +303,7 @@ class TestBaseAudio(TestCase):
         3. Set an int
         '''
         audio_file = self.path_to_test_files + self.file_delimit +\
-            "audio_file_1.mp3"
+            CONS.AUDIO_FILE_1
         ba_audio = base_audio.BaseAudio()
         ba_audio.load_track(audio_file)
 
@@ -317,7 +318,7 @@ class TestBaseAudio(TestCase):
 
     def reset_default_tags(self) -> None:
         audio_file = self.path_to_test_files + self.file_delimit +\
-            "audio_file_1.mp3"
+            CONS.AUDIO_FILE_1
         ba_audio = base_audio.BaseAudio()
         ba_audio.load_track(audio_file)
         ba_audio.set_tag("artist", "Dee Yan-Key")
@@ -330,7 +331,7 @@ class TestBaseAudio(TestCase):
         ba_audio.write_tags()
 
         audio_file = self.path_to_test_files + self.file_delimit +\
-            "audio_file_2.mp3"
+            CONS.AUDIO_FILE_2
         ba_audio = base_audio.BaseAudio()
         ba_audio.load_track(audio_file)
         ba_audio.set_tag("artist", "Siddhartha Corsus")

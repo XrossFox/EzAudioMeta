@@ -1,0 +1,5 @@
+AUDIO_FILE_1 = "audio_file_1.mp3"
+AUDIO_FILE_2 = "audio_file_2.mp3"
+AUDIO_FILE_3 = "01_audio_test_file_3.mp3"
+PICTURE_FILE = "test_file_picture.jpg"
+TEST_FILES_DIR = "test_files"

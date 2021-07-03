@@ -7,6 +7,7 @@ from click.testing import CliRunner
 
 from EzAudioMeta.audio import base_audio
 from EzAudioMeta.main import cli
+import tests.constants as CONS
 
 
 class TestCli(unittest.TestCase):
@@ -18,12 +19,8 @@ class TestCli(unittest.TestCase):
         elif platform.startswith("linux"):
             self.file_delimit = "/"
         self.path_to_test_files = \
-            str(self.current_directory) + self.file_delimit + "test_files"
-
-        # audio files constant name declaration
-        self.audio_file_1 = "audio_file_1.mp3"
-        self.audio_file_2 = "audio_file_2.mp3"
-        self.audio_file_3 = "01_audio_test_file_3.mp3"
+            str(self.current_directory) + self.file_delimit +\
+            CONS.TEST_FILES_DIR
 
         self.reset_default_tags()
 
@@ -84,7 +81,7 @@ class TestCli(unittest.TestCase):
         3. Message: "No tags specified.\n#
         '''
         audio_file = \
-            self.path_to_test_files + self.file_delimit + "audio_file_1.mp3"
+            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_1
         runner = CliRunner()
         result = runner.invoke(cli, ["--file", audio_file])
         self.assertEqual(result.exit_code, 0)
@@ -98,7 +95,7 @@ class TestCli(unittest.TestCase):
         3. check for changes.
         '''
         audio_file = \
-            self.path_to_test_files + self.file_delimit + "audio_file_1.mp3"
+            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_1
         runner = CliRunner()
         new_title = "Perreando con Lucifer"
         result = runner.invoke(cli, ["--file", audio_file,
@@ -117,7 +114,7 @@ class TestCli(unittest.TestCase):
         3. check for changes.
         '''
         audio_file = \
-            self.path_to_test_files + self.file_delimit + "audio_file_1.mp3"
+            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_1
         runner = CliRunner()
         new_title = "Perreando con Lucifer"
         new_album = "Satanas se Fue de Rumba"
@@ -134,7 +131,7 @@ class TestCli(unittest.TestCase):
         self.assertEqual(ba_audio.get_tag("album"), new_album)
         self.assertEqual(ba_audio.get_tag("genre"), new_genre)
         audio_file = \
-            self.path_to_test_files + self.file_delimit + "audio_file_1.mp3"
+            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_1
         runner = CliRunner()
         new_title = "Perreando con Lucifer"
         result = runner.invoke(cli, ["--file", audio_file,
@@ -150,7 +147,7 @@ class TestCli(unittest.TestCase):
         str'
         '''
         audio_file = \
-            self.path_to_test_files + self.file_delimit + "audio_file_1.mp3"
+            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_1
         runner = CliRunner()
         new_title = 15
         result = runner.invoke(cli, ["--file", audio_file,
@@ -170,9 +167,9 @@ class TestCli(unittest.TestCase):
 
         audio_files_path = self.path_to_test_files
         audio_file_1 = \
-            self.path_to_test_files + self.file_delimit + "audio_file_1.mp3"
+            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_1
         audio_file_2 = \
-            self.path_to_test_files + self.file_delimit + "audio_file_2.mp3"
+            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_2
         new_artist = "Lucifer"
 
         runner = CliRunner()
@@ -204,7 +201,7 @@ class TestCli(unittest.TestCase):
             "album": "Rumbeando en el Noveno Infierno",
             "tracktitle": "El Perreo de Lilith",
             "file": self.path_to_test_files + self.file_delimit +
-            "audio_file_1.mp3",
+            CONS.AUDIO_FILE_1,
             "year": 1984
         }
 
@@ -260,7 +257,7 @@ class TestCli(unittest.TestCase):
         audio = base_audio.BaseAudio()
         audio.load_track(tags_and_values["files-directory"] +
                          self.file_delimit +
-                         "audio_file_1.mp3")
+                         CONS.AUDIO_FILE_1)
 
         for key in tags_and_values:
 
@@ -271,7 +268,7 @@ class TestCli(unittest.TestCase):
 
         audio.load_track(tags_and_values["files-directory"] +
                          self.file_delimit +
-                         "audio_file_2.mp3")
+                         CONS.AUDIO_FILE_2)
 
         for key in tags_and_values:
 
@@ -317,7 +314,7 @@ class TestCli(unittest.TestCase):
         '''
         runner = CliRunner()
         audio_file = self.path_to_test_files + self.file_delimit +\
-            self.audio_file_3
+            CONS.AUDIO_FILE_3
 
         pattern = "(?<=\\d\\d).+(?=.mp3)"
 
@@ -342,7 +339,7 @@ class TestCli(unittest.TestCase):
         '''
         runner = CliRunner()
         audio_file = self.path_to_test_files + self.file_delimit +\
-            self.audio_file_3
+            CONS.AUDIO_FILE_3
 
         pattern = "(?<=\\d\\d).+(?=.mp3)"
 
@@ -368,7 +365,7 @@ class TestCli(unittest.TestCase):
         '''
         runner = CliRunner()
         audio_file = self.path_to_test_files + self.file_delimit +\
-            self.audio_file_3
+            CONS.AUDIO_FILE_3
 
         pattern = "(?<=\\d\\d).+(?=.mp3)"
 
@@ -393,7 +390,7 @@ class TestCli(unittest.TestCase):
         '''
         pattern = "(?<=\\d\\d).+(?=.mp3)"
         audio_file = self.path_to_test_files + self.file_delimit +\
-            self.audio_file_3
+            CONS.AUDIO_FILE_3
         tags_and_values = {
             "parse-title-capitalize": pattern,
             "file": audio_file,
@@ -423,7 +420,7 @@ class TestCli(unittest.TestCase):
         '''
         pattern = "(?<=\\d\\d).+(?=.mp3)"
         audio_file = self.path_to_test_files + self.file_delimit +\
-            self.audio_file_3
+            CONS.AUDIO_FILE_3
         tags_and_values = {
             "parse-title-as-is": pattern,
             "file": audio_file,
@@ -453,7 +450,7 @@ class TestCli(unittest.TestCase):
         '''
         pattern = "(?<=\\d\\d).+(?=.mp3)"
         audio_file = self.path_to_test_files + self.file_delimit +\
-            self.audio_file_3
+            CONS.AUDIO_FILE_3
         tags_and_values = {
             "parse-title-clean": pattern,
             "file": audio_file,
@@ -484,7 +481,7 @@ class TestCli(unittest.TestCase):
         audio_file =\
             self.path_to_test_files +\
             self.file_delimit +\
-            self.audio_file_3
+            CONS.AUDIO_FILE_3
         expected = 1
         runner = CliRunner()
         result = runner.invoke(cli, ["--file", audio_file,
@@ -509,15 +506,15 @@ class TestCli(unittest.TestCase):
         first_f =\
             self.path_to_test_files +\
             self.file_delimit +\
-            self.audio_file_3
+            CONS.AUDIO_FILE_3
         second_f =\
             self.path_to_test_files +\
             self.file_delimit +\
-            self.audio_file_1
+            CONS.AUDIO_FILE_1
         third_f =\
             self.path_to_test_files +\
             self.file_delimit +\
-            self.audio_file_2
+            CONS.AUDIO_FILE_2
 
         # expected track numbers
         expected1 = 3
@@ -553,7 +550,7 @@ class TestCli(unittest.TestCase):
         audio_file =\
             self.path_to_test_files +\
             self.file_delimit +\
-            self.audio_file_1
+            CONS.AUDIO_FILE_1
         expected = 0
         runner = CliRunner()
         result = runner.invoke(cli, ["--parse-track-number", pattern,
@@ -575,7 +572,7 @@ class TestCli(unittest.TestCase):
         audio_file =\
             self.path_to_test_files +\
             self.file_delimit +\
-            self.audio_file_3
+            CONS.AUDIO_FILE_3
         expected = 1
         tags_and_values = {
             "parse-track_number": pattern,
@@ -606,15 +603,15 @@ class TestCli(unittest.TestCase):
         first_f =\
             self.path_to_test_files +\
             self.file_delimit +\
-            self.audio_file_3
+            CONS.AUDIO_FILE_3
         second_f =\
             self.path_to_test_files +\
             self.file_delimit +\
-            self.audio_file_1
+            CONS.AUDIO_FILE_1
         third_f =\
             self.path_to_test_files +\
             self.file_delimit +\
-            self.audio_file_2
+            CONS.AUDIO_FILE_2
 
         # expected track numbers
         expected1 = 3
@@ -680,7 +677,7 @@ class TestCli(unittest.TestCase):
 
     def reset_default_tags(self) -> None:
         audio_file = \
-            self.path_to_test_files + self.file_delimit + "audio_file_1.mp3"
+            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_1
         ba_audio = base_audio.BaseAudio()
         ba_audio.load_track(audio_file)
         ba_audio.set_tag("artist", "Dee Yan-Key")
@@ -692,7 +689,7 @@ class TestCli(unittest.TestCase):
         ba_audio.write_tags()
 
         audio_file = \
-            self.path_to_test_files + self.file_delimit + "audio_file_2.mp3"
+            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_2
         ba_audio = base_audio.BaseAudio()
         ba_audio.load_track(audio_file)
         ba_audio.set_tag("artist", "Siddhartha Corsus")
@@ -702,7 +699,7 @@ class TestCli(unittest.TestCase):
                          "Let Go of Time (and Time Will Let Go of You)")
 
         audio_file = \
-            self.path_to_test_files + self.file_delimit + self.audio_file_3
+            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_3
         ba_audio = base_audio.BaseAudio()
         ba_audio.load_track(audio_file)
         ba_audio.set_tag("artist", "Unknown")
