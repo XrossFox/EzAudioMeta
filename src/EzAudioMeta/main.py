@@ -6,20 +6,25 @@ from utilities.optional_string_matchers import\
     OptionalStringMatchers
 from audio import base_audio
 
+# String-type tags
 str_tags = ["album", "albumartist", "comment", "composer", "genre",
             "lyrics", "tracktitle", "isrc", "artist"]
 
+# Int-type tags
 int_tags = ["compilation", "discnumber", "totaldiscs", "totaltracks",
             "tracknumber", "year", ]
 
+# Valid audio file extensions
 valid_extensions = ["aac", "aiff", "dsf", "flac", "m4a", "mp3",
                     "ogg", "opus", "wav", "wv"]
 
+# Platform file system delimiter
 if platform.startswith("win32"):
     file_delimit = "\\"
 elif platform.startswith("linux"):
     file_delimit = "/"
 
+# Help strings
 parse_cap_help = "Parses the 'tracktitle' from the actual file name." +\
     " The track title is capitalized as a title." +\
     " You must provide a valid regex expresion." +\
@@ -96,6 +101,9 @@ def cli(file, files_directory, from_file, album, albumartist, artist, comment,
         "isrc": isrc,
     }
 
+    # if loading tags from a text file, it parses the contents of the txt
+    # and assigns the values to local vars
+    # (by unpacking), also fills tags dict.
     if from_file is not None:
         (tags,
          file,
@@ -133,6 +141,7 @@ def cli(file, files_directory, from_file, album, albumartist, artist, comment,
                     or parse_title_clean),
                     parse_track_number, **tags)
 
+    # remove empty tags
     tags_to_set = actual_tags(**tags)
 
     validate_tags_types(**tags_to_set)
@@ -178,17 +187,21 @@ def parse_from_file(tags: dict,
                     parse_title_clean: str,
                     parse_track_number: str) -> tuple:
     '''
-    Receives the tags dict and
-    maps the values from the given text file.
+    Receives the tags dict, file vars and parse flags.
+    Maps the values from the given text file.
     -----
     Returns: a tuple (tags, file, files_directory, parse_title_capitalize
     parse_title_as_is, title).
     '''
+
     file_validation(from_file=from_file)
+
     with open(from_file, 'r') as text_file:
         lines = text_file.readlines()
 
         for line in lines:
+
+            # lines split in key tmp[0] - value tmp[1] pairs
             tmp = line.split("=", 1)
 
             # this is for regular tags only
@@ -278,35 +291,35 @@ def tags_validation(parse_title_enabled: bool,
 
 def file_validation(file=None, files_directory=None, from_file=None) -> None:
     '''
-    Validates that there is a file or a directory passed (or a from_file).
+    Validates that there is a file, a directory or a text file.
     '''
 
     if file is None and files_directory is None and from_file is None:
-        print("No file or directory specified.")
+        print("No file, directory or text file specified.")
         exit(0)
 
     if file:
         if not path.exists(file):
-            print("Your file does not actually exists :c")
+            print(f"> File not found: {file}")
             exit(1)
         if not path.isfile(file):
-            print("The specified File is not an actual File >:P")
+            print(f"> Not a file: {file}")
             exit(1)
 
     if files_directory:
         if not path.exists(files_directory):
-            print("Your directory does not actually exists :c")
+            print(f"> Dir not found: {files_directory}")
             exit(1)
         if not path.isdir(files_directory):
-            print("The specified directory is not an actual directory >:P")
+            print(f"> Not a dir: {files_directory}")
             exit(1)
 
     if from_file:
         if not path.exists(from_file):
-            print(f"{from_file} doesn't exist")
+            print(f"> File not found: {from_file}")
             exit(1)
         if not path.isfile(from_file):
-            print(f"{from_file} is not a valid file")
+            print(f"> Not a file: {from_file}")
             exit(1)
 
 
