@@ -2,9 +2,9 @@ from os import path, listdir
 from sys import platform
 
 import click
-from utilities.optional_string_matchers import OptionalStringMatchers
-from audio import base_audio
-import utilities.custom_exceptions as CE
+import audio.base_audio
+import utilities.custom_exceptions
+import utilities.optional_string_matchers
 
 # String-type tags
 str_tags = ["album", "albumartist", "comment", "composer", "genre",
@@ -44,7 +44,7 @@ parse_track_number = "Parses the 'tracknumber' from the actual file name." +\
 help_files_dir = "Note: overrides --file option"
 help_from_file = "Note: overrides --file and --files-directory"
 
-_op_str_matchers = OptionalStringMatchers()
+_op_str_matchers = utilities.optional_string_matchers.OptionalStringMatchers()
 
 
 @click.command()
@@ -167,12 +167,12 @@ def cli(file, files_directory, from_file, album, albumartist, artist, comment,
 
             base_audio_wrapper(a_file, **tags_to_set)
 
-    except CE.ExpectedTermination as et:
+    except utilities.custom_exceptions.ExpectedTermination as et:
         print(et)
         print("Now exiting")
         exit(0)
 
-    except CE.UnexpectedTermination as ut:
+    except utilities.custom_exceptions.UnexpectedTermination as ut:
         print(ut)
         print("ERROR: NOW EXITING")
         exit(1)
@@ -218,7 +218,7 @@ def parse_from_file(tags: dict,
                     if tmp[0] in int_tags:
                         tags[tmp[0]] = int(tags[tmp[0]])
                 except Exception as e:
-                    raise CE.\
+                    raise utilities.custom_exceptions.\
                         UnexpectedTermination("The following tag" +
                                               " is expected to" +
                                               f" be a number: {tmp[0]}") from e
@@ -257,10 +257,10 @@ def validate_tags_types(**tags_to_set):
     for tag in tags_to_set:
         if tag in str_tags and not isinstance(tags_to_set[tag], str):
             message = (f"'{tag}' is expected to be a sequence of characters.")
-            raise CE.UnexpectedTermination(message)
+            raise utilities.custom_exceptions.UnexpectedTermination(message)
         elif tag in int_tags and not isinstance(tags_to_set[tag], int):
             message = (f"'{tag}' is expected to be a sequence of numbers.")
-            raise CE.UnexpectedTermination(message)
+            raise utilities.custom_exceptions.UnexpectedTermination(message)
 
 
 def actual_tags(**tags) -> dict:
@@ -291,7 +291,7 @@ def tags_validation(parse_title_enabled: bool,
 
     if all_none:
         message = ("No tags specified.")
-        raise CE.ExpectedTermination(message)
+        raise utilities.custom_exceptions.ExpectedTermination(message)
 
 
 def file_validation(file=None, files_directory=None, from_file=None) -> None:
@@ -301,31 +301,31 @@ def file_validation(file=None, files_directory=None, from_file=None) -> None:
 
     if file is None and files_directory is None and from_file is None:
         message = ("No file, directory or text file specified.")
-        raise CE.ExpectedTermination(message)
+        raise utilities.custom_exceptions.ExpectedTermination(message)
 
     if file:
         if not path.exists(file):
             message = (f"> File not found: {file}")
-            raise CE.UnexpectedTermination(message)
+            raise utilities.custom_exceptions.UnexpectedTermination(message)
         if not path.isfile(file):
             message = (f"> Not a file: {file}")
-            raise CE.UnexpectedTermination(message)
+            raise utilities.custom_exceptions.UnexpectedTermination(message)
 
     if files_directory:
         if not path.exists(files_directory):
             message = (f"> Dir not found: {files_directory}")
-            raise CE.UnexpectedTermination(message)
+            raise utilities.custom_exceptions.UnexpectedTermination(message)
         if not path.isdir(files_directory):
             message = (f"> Not a dir: {files_directory}")
-            raise CE.UnexpectedTermination(message)
+            raise utilities.custom_exceptions.UnexpectedTermination(message)
 
     if from_file:
         if not path.exists(from_file):
             message = (f"> File not found: {from_file}")
-            raise CE.UnexpectedTermination(message)
+            raise utilities.custom_exceptions.UnexpectedTermination(message)
         if not path.isfile(from_file):
             message = (f"> Not a file: {from_file}")
-            raise CE.UnexpectedTermination(message)
+            raise utilities.custom_exceptions.UnexpectedTermination(message)
 
 
 def base_audio_wrapper(file, **tags_to_set):
@@ -333,17 +333,18 @@ def base_audio_wrapper(file, **tags_to_set):
     send and write tags to file
     '''
     try:
-        audio_file = base_audio.BaseAudio()
+        audio_file = audio.base_audio.BaseAudio()
         audio_file.load_track(file)
         audio_file.set_tags(**tags_to_set)
         audio_file.write_tags()
     except NotImplementedError as nie:
         message = (f"Error while loading file:{file}")
-        raise CE.UnexpectedTermination(message) from nie
+        raise utilities.custom_exceptions.UnexpectedTermination(message)\
+            from nie
     except TypeError as te:
-        raise CE.UnexpectedTermination from te
+        raise utilities.custom_exceptions.UnexpectedTermination from te
     except Exception as e:
-        raise CE.UnexpectedTermination from e
+        raise utilities.custom_exceptions.UnexpectedTermination from e
 
 
 def file_walker(files_directory: str, file: str) -> list:
