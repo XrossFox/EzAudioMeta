@@ -120,21 +120,7 @@ def cli(file, files_directory, from_file, album, albumartist, artist, comment,
                                                parse_title_clean,
                                                parse_track_number)
 
-    file_validation(file, files_directory)
-
-    # look for all files in dir if valid
-    if files_directory:
-        actual_files = list(
-                        filter(
-                            lambda a: a.split(".")[-1] in valid_extensions,
-                            listdir(files_directory))
-                        )
-
-        for i in range(len(actual_files)):
-            actual_files[i] = files_directory + file_delimit + actual_files[i]
-    # else just 1 file
-    else:
-        actual_files = [file]
+    actual_files = file_walker(files_directory, file)
 
     tags_validation((parse_title_as_is
                     or parse_title_capitalize
@@ -342,6 +328,32 @@ def base_audio_wrapper(file, **tags_to_set):
     except Exception as e:
         print(e)
         exit(1)
+
+
+def file_walker(files_directory: str, file: str) -> list:
+    '''
+    Receives a path to a directory and returns a list of it's files.
+    If only a file is received, returns that file in a list.
+    If no file is received, ValueError is raised.
+    '''
+
+    file_validation(file, files_directory)
+
+    # look for all files in dir if valid
+    if files_directory:
+        actual_files = list(
+                        filter(
+                            lambda a: a.split(".")[-1] in valid_extensions,
+                            listdir(files_directory))
+                        )
+
+        for i in range(len(actual_files)):
+            actual_files[i] = files_directory + file_delimit + actual_files[i]
+    # else just 1 file
+    else:
+        actual_files = [file]
+
+    return actual_files
 
 
 if __name__ == "__main__":
