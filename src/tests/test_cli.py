@@ -2,11 +2,9 @@ import unittest
 from pathlib import Path
 from sys import platform
 from random import randrange
-
 from click.testing import CliRunner
-
-from EzAudioMeta.audio import base_audio
-from EzAudioMeta.main import cli
+from tests.context import BaseAudio
+from tests.context import cli
 import tests.constants as CONS
 
 
@@ -102,7 +100,7 @@ class TestCli(unittest.TestCase):
                                      "--tracktitle", new_title])
         self.assertEqual(result.exit_code, 0)
 
-        ba_audio = base_audio.BaseAudio()
+        ba_audio = BaseAudio()
         ba_audio.load_track(audio_file)
         self.assertEqual(ba_audio.get_tag("tracktitle"), new_title)
 
@@ -125,7 +123,7 @@ class TestCli(unittest.TestCase):
                                      "--genre", new_genre])
         self.assertEqual(result.exit_code, 0)
 
-        ba_audio = base_audio.BaseAudio()
+        ba_audio = BaseAudio()
         ba_audio.load_track(audio_file)
         self.assertEqual(ba_audio.get_tag("tracktitle"), new_title)
         self.assertEqual(ba_audio.get_tag("album"), new_album)
@@ -178,7 +176,7 @@ class TestCli(unittest.TestCase):
                                      ])
 
         self.assertEqual(result.exit_code, 0)
-        audio = base_audio.BaseAudio()
+        audio = BaseAudio()
         audio.load_track(audio_file_1)
         self.assertEqual(audio.get_tag("artist"), new_artist)
         audio.load_track(audio_file_2)
@@ -214,7 +212,7 @@ class TestCli(unittest.TestCase):
 
         self.assertEqual(result.exit_code, 0)
 
-        audio = base_audio.BaseAudio()
+        audio = BaseAudio()
         audio.load_track(tags_and_values["file"])
 
         for key in tags_and_values:
@@ -254,7 +252,7 @@ class TestCli(unittest.TestCase):
 
         self.assertEqual(result.exit_code, 0)
 
-        audio = base_audio.BaseAudio()
+        audio = BaseAudio()
         audio.load_track(tags_and_values["files-directory"] +
                          self.file_delimit +
                          CONS.AUDIO_FILE_1)
@@ -325,7 +323,7 @@ class TestCli(unittest.TestCase):
         expected = "_Audio_Test_File_3"
 
         self.assertEqual(result.exit_code, 0)
-        audio = base_audio.BaseAudio()
+        audio = BaseAudio()
         audio.load_track(audio_file)
         self.assertEqual(audio.get_tag("tracktitle"), expected)
 
@@ -350,7 +348,7 @@ class TestCli(unittest.TestCase):
         expected = "_audio_test_file_3"
 
         self.assertEqual(result.exit_code, 0)
-        audio = base_audio.BaseAudio()
+        audio = BaseAudio()
         audio.load_track(audio_file)
         self.assertEqual(audio.get_tag("tracktitle"), expected)
 
@@ -376,7 +374,7 @@ class TestCli(unittest.TestCase):
         expected = "Audio Test File 3"
 
         self.assertEqual(result.exit_code, 0)
-        audio = base_audio.BaseAudio()
+        audio = BaseAudio()
         audio.load_track(audio_file)
         self.assertEqual(audio.get_tag("tracktitle"), expected)
 
@@ -406,7 +404,7 @@ class TestCli(unittest.TestCase):
         expected = "_Audio_Test_File_3"
 
         self.assertEqual(result.exit_code, 0)
-        audio = base_audio.BaseAudio()
+        audio = BaseAudio()
         audio.load_track(audio_file)
         self.assertEqual(audio.get_tag("tracktitle"), expected)
 
@@ -436,7 +434,7 @@ class TestCli(unittest.TestCase):
         expected = "_audio_test_file_3"
 
         self.assertEqual(result.exit_code, 0)
-        audio = base_audio.BaseAudio()
+        audio = BaseAudio()
         audio.load_track(audio_file)
         self.assertEqual(audio.get_tag("tracktitle"), expected)
 
@@ -466,7 +464,7 @@ class TestCli(unittest.TestCase):
         expected = "Audio Test File 3"
 
         self.assertEqual(result.exit_code, 0)
-        audio = base_audio.BaseAudio()
+        audio = BaseAudio()
         audio.load_track(audio_file)
         self.assertEqual(audio.get_tag("tracktitle"), expected)
 
@@ -487,7 +485,7 @@ class TestCli(unittest.TestCase):
         result = runner.invoke(cli, ["--file", audio_file,
                                      "--parse-track-number", pattern])
         self.assertEqual(result.exit_code, 0)
-        audio = base_audio.BaseAudio()
+        audio = BaseAudio()
         audio.load_track(audio_file)
         self.assertEqual(audio.get_tag("tracknumber"), expected)
 
@@ -527,7 +525,7 @@ class TestCli(unittest.TestCase):
 
         self.assertEqual(result.exit_code, 0)
 
-        audio = base_audio.BaseAudio()
+        audio = BaseAudio()
 
         # expected 1
         audio.load_track(first_f)
@@ -556,7 +554,7 @@ class TestCli(unittest.TestCase):
         result = runner.invoke(cli, ["--parse-track-number", pattern,
                                      "--file", audio_file])
         self.assertEqual(result.exit_code, 0)
-        audio = base_audio.BaseAudio()
+        audio = BaseAudio()
         audio.load_track(audio_file)
         actual_number = audio.get_tag("tracknumber")
         self.assertEqual(actual_number, expected)
@@ -585,7 +583,7 @@ class TestCli(unittest.TestCase):
         runner = CliRunner()
         result = runner.invoke(cli, ["--from-file", test_file_txt])
         self.assertEqual(result.exit_code, 0)
-        audio = base_audio.BaseAudio()
+        audio = BaseAudio()
         audio.load_track(audio_file)
         self.assertEqual(audio.get_tag("tracknumber"), expected)
 
@@ -632,7 +630,7 @@ class TestCli(unittest.TestCase):
 
         self.assertEqual(result.exit_code, 0)
 
-        audio = base_audio.BaseAudio()
+        audio = BaseAudio()
 
         # expected 1
         audio.load_track(first_f)
@@ -678,7 +676,7 @@ class TestCli(unittest.TestCase):
     def reset_default_tags(self) -> None:
         audio_file = \
             self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_1
-        ba_audio = base_audio.BaseAudio()
+        ba_audio = BaseAudio()
         ba_audio.load_track(audio_file)
         ba_audio.set_tag("artist", "Dee Yan-Key")
         ba_audio.set_tag("album", "little night thoughts")
@@ -690,7 +688,7 @@ class TestCli(unittest.TestCase):
 
         audio_file = \
             self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_2
-        ba_audio = base_audio.BaseAudio()
+        ba_audio = BaseAudio()
         ba_audio.load_track(audio_file)
         ba_audio.set_tag("artist", "Siddhartha Corsus")
         ba_audio.set_tag("album", "Fragments of Light")
@@ -700,7 +698,7 @@ class TestCli(unittest.TestCase):
 
         audio_file = \
             self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_3
-        ba_audio = base_audio.BaseAudio()
+        ba_audio = BaseAudio()
         ba_audio.load_track(audio_file)
         ba_audio.set_tag("artist", "Unknown")
         ba_audio.set_tag("album", "Unknown")
