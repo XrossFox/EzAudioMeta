@@ -2,9 +2,9 @@ from os import path, listdir
 from sys import platform
 
 import click
-from utilities.optional_string_matchers import\
-    OptionalStringMatchers
+from utilities.optional_string_matchers import OptionalStringMatchers
 from audio import base_audio
+import utilities.custom_exceptions as CE
 
 # String-type tags
 str_tags = ["album", "albumartist", "comment", "composer", "genre",
@@ -82,86 +82,105 @@ def cli(file, files_directory, from_file, album, albumartist, artist, comment,
     strings, but some like 'tracknumber' are numbers. At least a file and a tag
     are expected to be set.
     '''
+    try:
 
-    tags = {
-        "album": album,
-        "albumartist": albumartist,
-        "artist": artist,
-        "comment": comment,
-        "compilation": compilation,
-        "composer": composer,
-        "discnumber": discnumber,
-        "genre": genre,
-        "lyrics": lyrics,
-        "totaldiscs": totaldiscs,
-        "totaltracks": totaltracks,
-        "tracknumber": tracknumber,
-        "tracktitle": tracktitle,
-        "year": year,
-        "isrc": isrc,
-    }
+        tags = {
+            "album": album,
+            "albumartist": albumartist,
+            "artist": artist,
+            "comment": comment,
+            "compilation": compilation,
+            "composer": composer,
+            "discnumber": discnumber,
+            "genre": genre,
+            "lyrics": lyrics,
+            "totaldiscs": totaldiscs,
+            "totaltracks": totaltracks,
+            "tracknumber": tracknumber,
+            "tracktitle": tracktitle,
+            "year": year,
+            "isrc": isrc,
+        }
 
-    # if loading tags from a text file, it parses the contents of the txt
-    # and assigns the values to local vars
-    # (by unpacking), also fills tags dict.
-    if from_file is not None:
-        (tags,
-         file,
-         files_directory,
-         parse_title_capitalize,
-         parse_title_as_is,
-         parse_title_clean,
-         parse_track_number) = parse_from_file(tags,
-                                               file,
-                                               files_directory,
-                                               from_file,
-                                               parse_title_capitalize,
-                                               parse_title_as_is,
-                                               parse_title_clean,
-                                               parse_track_number)
+        # if loading tags from a text file, it parses the contents of the txt
+        # and assigns the values to local vars
+        # (by unpacking), also fills tags dict.
+        if from_file is not None:
+            (tags,
+             file,
+             files_directory,
+             parse_title_capitalize,
+             parse_title_as_is,
+             parse_title_clean,
+             parse_track_number) = parse_from_file(tags,
+                                                   file,
+                                                   files_directory,
+                                                   from_file,
+                                                   parse_title_capitalize,
+                                                   parse_title_as_is,
+                                                   parse_title_clean,
+                                                   parse_track_number)
 
-    actual_files = file_walker(files_directory, file)
+        actual_files = file_walker(files_directory, file)
 
-    tags_validation((parse_title_as_is
-                    or parse_title_capitalize
-                    or parse_title_clean),
-                    parse_track_number, **tags)
+        tags_validation((parse_title_as_is
+                        or parse_title_capitalize
+                        or parse_title_clean),
+                        parse_track_number, **tags)
 
-    # remove empty tags
-    tags_to_set = actual_tags(**tags)
+        # remove empty tags
+        tags_to_set = actual_tags(**tags)
 
-    validate_tags_types(**tags_to_set)
+        validate_tags_types(**tags_to_set)
 
-    for a_file in actual_files:
+        for a_file in actual_files:
 
-        # If parse from title is set, then each time a track is received, the
-        # file name will be parsed to extract the track title and added to
-        # the tags to set dict. Since its called for all tracks, it will always
-        # update before setting the tags to file.
-        if parse_title_capitalize:
-            tags_to_set["tracktitle"] =\
-                 _op_str_matchers.\
-                 extract_track_title_capitalize(a_file,
-                                                parse_title_capitalize)
+            # If parse from title is set, then each time a track is received,
+            # the file name will be parsed to extract the track title and
+            # added to the tags to set dict. Since its called for all
+            # tracks, it will always update before setting the tags to file.
+            if parse_title_capitalize:
+                tags_to_set["tracktitle"] =\
+                    _op_str_matchers.\
+                    extract_track_title_capitalize(a_file,
+                                                   parse_title_capitalize)
 
-        if parse_title_as_is:
-            tags_to_set["tracktitle"] =\
-                 _op_str_matchers.extract_track_title_as_is(a_file,
-                                                            parse_title_as_is)
+            if parse_title_as_is:
+                tags_to_set["tracktitle"] =\
+                    _op_str_matchers.\
+                    extract_track_title_as_is(a_file,
+                                              parse_title_as_is)
 
-        if parse_title_clean:
-            tags_to_set["tracktitle"] =\
-                _op_str_matchers.extract_track_title_cleanup_and_capitalize(
-                    a_file,
-                    parse_title_clean
-                )
+            if parse_title_clean:
+                tags_to_set["tracktitle"] =\
+                    _op_str_matchers.\
+                    extract_track_title_cleanup_and_capitalize(
+                        a_file,
+                        parse_title_clean
+                    )
 
-        if parse_track_number:
-            tags_to_set["tracknumber"] =\
-                _op_str_matchers.extract_track_number(a_file,
-                                                      parse_track_number)
+            if parse_track_number:
+                tags_to_set["tracknumber"] =\
+                    _op_str_matchers.\
+                    extract_track_number(a_file,
+                                         parse_track_number)
 
-        base_audio_wrapper(a_file, **tags_to_set)
+            base_audio_wrapper(a_file, **tags_to_set)
+
+    except CE.ExpectedTermination as et:
+        print(et)
+        print("Now exiting")
+        exit(0)
+
+    except CE.UnexpectedTermination as ut:
+        print(ut)
+        print("ERROR: NOW EXITING")
+        exit(1)
+
+    except Exception as e:
+        print(e)
+        print("UNCAUGHT EXCEPTION: NOW EXITING")
+        exit(1)
 
 
 def parse_from_file(tags: dict,
@@ -199,10 +218,10 @@ def parse_from_file(tags: dict,
                     if tmp[0] in int_tags:
                         tags[tmp[0]] = int(tags[tmp[0]])
                 except Exception as e:
-                    print(e)
-                    print("The following tag is expected to" +
-                          f" be a number: {tmp[0]}")
-                    exit(1)
+                    raise CE.\
+                        UnexpectedTermination("The following tag" +
+                                              " is expected to" +
+                                              f" be a number: {tmp[0]}") from e
 
             elif tmp[0] == "file":
                 file = tmp[1].strip()
@@ -237,11 +256,11 @@ def validate_tags_types(**tags_to_set):
     '''
     for tag in tags_to_set:
         if tag in str_tags and not isinstance(tags_to_set[tag], str):
-            print(f"'{tag}' is expected to be a sequence of characters.")
-            exit(1)
+            message = (f"'{tag}' is expected to be a sequence of characters.")
+            raise CE.UnexpectedTermination(message)
         elif tag in int_tags and not isinstance(tags_to_set[tag], int):
-            print(f"'{tag}' is expected to be a sequence of numbers.")
-            exit(1)
+            message = (f"'{tag}' is expected to be a sequence of numbers.")
+            raise CE.UnexpectedTermination(message)
 
 
 def actual_tags(**tags) -> dict:
@@ -271,8 +290,8 @@ def tags_validation(parse_title_enabled: bool,
         all_none = False
 
     if all_none:
-        print("No tags specified.")
-        exit(0)
+        message = ("No tags specified.")
+        raise CE.ExpectedTermination(message)
 
 
 def file_validation(file=None, files_directory=None, from_file=None) -> None:
@@ -281,32 +300,32 @@ def file_validation(file=None, files_directory=None, from_file=None) -> None:
     '''
 
     if file is None and files_directory is None and from_file is None:
-        print("No file, directory or text file specified.")
-        exit(0)
+        message = ("No file, directory or text file specified.")
+        raise CE.ExpectedTermination(message)
 
     if file:
         if not path.exists(file):
-            print(f"> File not found: {file}")
-            exit(1)
+            message = (f"> File not found: {file}")
+            raise CE.UnexpectedTermination(message)
         if not path.isfile(file):
-            print(f"> Not a file: {file}")
-            exit(1)
+            message = (f"> Not a file: {file}")
+            raise CE.UnexpectedTermination(message)
 
     if files_directory:
         if not path.exists(files_directory):
-            print(f"> Dir not found: {files_directory}")
-            exit(1)
+            message = (f"> Dir not found: {files_directory}")
+            raise CE.UnexpectedTermination(message)
         if not path.isdir(files_directory):
-            print(f"> Not a dir: {files_directory}")
-            exit(1)
+            message = (f"> Not a dir: {files_directory}")
+            raise CE.UnexpectedTermination(message)
 
     if from_file:
         if not path.exists(from_file):
-            print(f"> File not found: {from_file}")
-            exit(1)
+            message = (f"> File not found: {from_file}")
+            raise CE.UnexpectedTermination(message)
         if not path.isfile(from_file):
-            print(f"> Not a file: {from_file}")
-            exit(1)
+            message = (f"> Not a file: {from_file}")
+            raise CE.UnexpectedTermination(message)
 
 
 def base_audio_wrapper(file, **tags_to_set):
@@ -319,15 +338,12 @@ def base_audio_wrapper(file, **tags_to_set):
         audio_file.set_tags(**tags_to_set)
         audio_file.write_tags()
     except NotImplementedError as nie:
-        print(nie)
-        print(f"Error while loading file:{file}")
-        exit(1)
+        message = (f"Error while loading file:{file}")
+        raise CE.UnexpectedTermination(message) from nie
     except TypeError as te:
-        print(te)
-        exit(1)
+        raise CE.UnexpectedTermination from te
     except Exception as e:
-        print(e)
-        exit(1)
+        raise CE.UnexpectedTermination from e
 
 
 def file_walker(files_directory: str, file: str) -> list:
