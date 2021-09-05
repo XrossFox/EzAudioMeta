@@ -35,7 +35,8 @@ class TestCli(unittest.TestCase):
         runner = CliRunner()
         result = runner.invoke(cli)
         self.assertEqual(result.exit_code, 0)
-        self.assertEqual(result.output, "No file or directory specified.\n")
+        self.assertEqual(result.output, "No file, directory or text file" +
+                         " specified.\nNow exiting\n")
 
     def test_run_cli_invalid_file(self):
         '''
@@ -50,8 +51,9 @@ class TestCli(unittest.TestCase):
         result = runner.invoke(cli, ["--file", audio_directory,
                                      "--tracktitle", new_title])
         self.assertEqual(result.exit_code, 1)
-        self.assertEqual(result.output, "The specified File is not an"
-                                        + " actual File >:P\n")
+        self.assertEqual(result.output, "> Not a file: c:\\" +
+                         "David\\repos\\EzAudioMeta\\src\\tests\\" +
+                         "test_files\nERROR: NOW EXITING\n")
 
     def test_run_cli_file_does_not_exist(self):
         '''
@@ -68,8 +70,9 @@ class TestCli(unittest.TestCase):
         result = runner.invoke(cli, ["--file", audio_directory,
                                      "--tracktitle", new_title])
         self.assertEqual(result.exit_code, 1)
-        self.assertEqual(result.output, "Your file does not actually"
-                                        + " exists :c\n")
+        self.assertEqual(result.output, "> File not found: c:\\David\\repos" + 
+                         "\\EzAudioMeta\\src\\tests\\test_files" + 
+                         "\\Rumba Generica.mp3\nERROR: NOW EXITING\n")
 
     def test_run_cli_no_tag(self):
         '''
@@ -83,7 +86,7 @@ class TestCli(unittest.TestCase):
         runner = CliRunner()
         result = runner.invoke(cli, ["--file", audio_file])
         self.assertEqual(result.exit_code, 0)
-        self.assertEqual(result.output, "No tags specified.\n")
+        self.assertEqual(result.output, "No tags specified.\nNow exiting\n")
 
     def test_run_cli_set_tracktitle(self):
         '''
@@ -151,7 +154,8 @@ class TestCli(unittest.TestCase):
         result = runner.invoke(cli, ["--file", audio_file,
                                      "--tracktitle", new_title])
         self.assertEqual(result.exit_code, 1)
-        expected = "'tracktitle' is expected to be a sequence of characters.\n"
+        expected = ("'tracktitle' is expected to be a sequence of characters." +
+                    "\nERROR: NOW EXITING\n")
         self.assertEqual(result.output, expected)
 
     def test_run_cli_all_files(self):
@@ -287,7 +291,8 @@ class TestCli(unittest.TestCase):
         result = runner.invoke(cli, ["--from-file", inv])
 
         self.assertEqual(result.exit_code, 1)
-        self.assertEqual(result.output, f"{inv} doesn't exist\n")
+        self.assertEqual(result.output, f"> File not found: {inv}" +
+                         "\nERROR: NOW EXITING\n")
 
     def test_run_cli_from_text_file_file_is_not_file(self):
         '''
@@ -300,7 +305,8 @@ class TestCli(unittest.TestCase):
         result = runner.invoke(cli, ["--from-file", inv])
 
         self.assertEqual(result.exit_code, 1)
-        self.assertEqual(result.output, f"{inv} is not a valid file\n")
+        self.assertEqual(result.output, f"> Not a file: {inv}" +
+                         "\nERROR: NOW EXITING\n")
 
     def test_extract_title_title_capitalize(self) -> None:
         '''
