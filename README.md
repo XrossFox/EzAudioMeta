@@ -12,6 +12,9 @@ anything. I made use of f-strings wherever i could, so i'd recommend Python 3.6 
 the very least.
 - music-tag 0.4.2 (and it's dependencies)
 - click 7.1.2
+- python-magic==0.4.24
+- python-magic-bin==0.4.14 (WINDOWS USERS ONLY)
+- libmagic (NON-WINDOWS USERS ONLY, [CHECK HERE](https://github.com/ahupp/python-magic)
 
 ## Usage:
 
