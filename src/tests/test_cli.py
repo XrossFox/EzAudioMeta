@@ -1,5 +1,6 @@
 import unittest
 from pathlib import Path
+from pathlib import PurePath
 from sys import platform
 from random import randrange
 from click.testing import CliRunner
@@ -51,9 +52,9 @@ class TestCli(unittest.TestCase):
         result = runner.invoke(cli, ["--file", audio_directory,
                                      "--tracktitle", new_title])
         self.assertEqual(result.exit_code, 1)
-        self.assertEqual(result.output, "> Not a file: c:\\" +
-                         "David\\repos\\EzAudioMeta\\src\\tests\\" +
-                         "test_files\nERROR: NOW EXITING\n")
+        self.assertEqual(result.output, "> Not a file: " +
+                         f"{audio_directory}" +
+                         "\nERROR: NOW EXITING\n")
 
     def test_run_cli_file_does_not_exist(self):
         '''
@@ -70,9 +71,27 @@ class TestCli(unittest.TestCase):
         result = runner.invoke(cli, ["--file", audio_directory,
                                      "--tracktitle", new_title])
         self.assertEqual(result.exit_code, 1)
-        self.assertEqual(result.output, "> File not found: c:\\David\\repos" +
-                         "\\EzAudioMeta\\src\\tests\\test_files" +
-                         "\\Rumba Generica.mp3\nERROR: NOW EXITING\n")
+        self.assertEqual(result.output, "> File not found: " +
+                         f"{audio_directory}" +
+                         "\nERROR: NOW EXITING\n")
+
+    def test_run_cli_not_audio_file(self):
+        '''
+        When attempting to run the CLI specifying a non audio file:
+        1. invoke the cli with a directory instead of a file.
+        2. Error code 1 expected.
+        3. Message: "Not an audio file"
+        '''
+        audio_directory = self.path_to_test_files
+        txt_file_pth = str(PurePath(audio_directory, CONS.TEXT_FILE))
+        runner = CliRunner()
+        new_title = "Perreando con Lucifer"
+        result = runner.invoke(cli, ["--file", txt_file_pth,
+                                     "--tracktitle", new_title])
+        self.assertEqual(result.exit_code, 1)
+        self.assertEqual(result.output, "> Not an audio file: " +
+                         f"{txt_file_pth}" +
+                         "\nERROR: NOW EXITING\n")
 
     def test_run_cli_no_tag(self):
         '''
@@ -292,6 +311,22 @@ class TestCli(unittest.TestCase):
 
         self.assertEqual(result.exit_code, 1)
         self.assertEqual(result.output, f"> File not found: {inv}" +
+                         "\nERROR: NOW EXITING\n")
+
+    def test_run_cli_from_text_file_not_txt(self):
+        '''
+        When attempting to load tags from a file, that is not a text file.
+        1. Attempt to load a text file that is not a text file.
+        2. An exception should be raised.
+        '''
+
+        runner = CliRunner()
+        test_pth = self.path_to_test_files
+        audio_file = str(Path(test_pth, CONS.PICTURE_FILE))
+        result = runner.invoke(cli, ["--from-file", audio_file])
+
+        self.assertEqual(result.exit_code, 1)
+        self.assertEqual(result.output, f"> Not a text file: {audio_file}" +
                          "\nERROR: NOW EXITING\n")
 
     def test_run_cli_from_text_file_file_is_not_file(self):

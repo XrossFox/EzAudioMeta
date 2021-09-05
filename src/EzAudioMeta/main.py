@@ -2,6 +2,7 @@ from os import path, listdir
 from sys import platform
 
 import click
+import magic
 import audio.base_audio
 import utilities.custom_exceptions
 import utilities.optional_string_matchers
@@ -310,6 +311,10 @@ def file_validation(file=None, files_directory=None, from_file=None) -> None:
         if not path.isfile(file):
             message = (f"> Not a file: {file}")
             raise utilities.custom_exceptions.UnexpectedTermination(message)
+        f = magic.from_file(file, mime=True)
+        if not f.startswith("audio/"):
+            message = (f"> Not an audio file: {file}")
+            raise utilities.custom_exceptions.UnexpectedTermination(message)
 
     if files_directory:
         if not path.exists(files_directory):
@@ -326,6 +331,10 @@ def file_validation(file=None, files_directory=None, from_file=None) -> None:
         if not path.isfile(from_file):
             message = (f"> Not a file: {from_file}")
             raise utilities.custom_exceptions.UnexpectedTermination(message)
+        f = magic.from_file(from_file, mime=True)
+        if not f == "text/plain":
+            message = (f"> Not a text file: {from_file}")
+            raise utilities.custom_exceptions.UnexpectedTermination(message)
 
 
 def base_audio_wrapper(file, **tags_to_set):
@@ -338,7 +347,7 @@ def base_audio_wrapper(file, **tags_to_set):
         audio_file.set_tags(**tags_to_set)
         audio_file.write_tags()
     except NotImplementedError as nie:
-        message = (f"Error while loading file:{file}")
+        message = (f"Error while loading file: {file}")
         raise utilities.custom_exceptions.UnexpectedTermination(message)\
             from nie
     except TypeError as te:
