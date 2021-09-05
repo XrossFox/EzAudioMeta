@@ -70,8 +70,8 @@ class TestCli(unittest.TestCase):
         result = runner.invoke(cli, ["--file", audio_directory,
                                      "--tracktitle", new_title])
         self.assertEqual(result.exit_code, 1)
-        self.assertEqual(result.output, "> File not found: c:\\David\\repos" + 
-                         "\\EzAudioMeta\\src\\tests\\test_files" + 
+        self.assertEqual(result.output, "> File not found: c:\\David\\repos" +
+                         "\\EzAudioMeta\\src\\tests\\test_files" +
                          "\\Rumba Generica.mp3\nERROR: NOW EXITING\n")
 
     def test_run_cli_no_tag(self):
@@ -154,8 +154,8 @@ class TestCli(unittest.TestCase):
         result = runner.invoke(cli, ["--file", audio_file,
                                      "--tracktitle", new_title])
         self.assertEqual(result.exit_code, 1)
-        expected = ("'tracktitle' is expected to be a sequence of characters." +
-                    "\nERROR: NOW EXITING\n")
+        expected = ("'tracktitle' is expected to be a sequence " +
+                    "of characters.\nERROR: NOW EXITING\n")
         self.assertEqual(result.output, expected)
 
     def test_run_cli_all_files(self):
