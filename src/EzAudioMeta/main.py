@@ -1,57 +1,19 @@
 from os import path, listdir
-from sys import platform
 
 import click
 import magic
 import audio.base_audio
 import utilities.custom_exceptions
 import utilities.optional_string_matchers
-
-# String-type tags
-str_tags = ["album", "albumartist", "comment", "composer", "genre",
-            "lyrics", "tracktitle", "isrc", "artist"]
-
-# Int-type tags
-int_tags = ["compilation", "discnumber", "totaldiscs", "totaltracks",
-            "tracknumber", "year", ]
-
-# Valid audio file extensions
-valid_extensions = ["aac", "aiff", "dsf", "flac", "m4a", "mp3",
-                    "ogg", "opus", "wav", "wv"]
-
-# Platform file system delimiter
-if platform.startswith("win32"):
-    file_delimit = "\\"
-elif platform.startswith("linux"):
-    file_delimit = "/"
-
-# Help strings
-parse_cap_help = "Parses the 'tracktitle' from the actual file name." +\
-    " The track title is capitalized as a title." +\
-    " You must provide a valid regex expresion." +\
-    " Ej. (?<=\\d\\d\\s).+(?=\\.flac)."
-parse_asis_help = "Parses the 'tracktitle' from the actual file name." +\
-    " The track title is left as is with no capitalization or processing." +\
-    " You must provide a valid regex expresion." +\
-    " Ej. (?<=\\d\\d\\s).+(?=\\.flac)."
-parse_clean_help = "Parses the 'tracktitle' from the actual file name." +\
-    " The track title has all '-', '_' and multiple whitespaces " +\
-    "removed and trimmed, and then it´s 'title capitalized'." +\
-    " You must provide a valid regex expresion." +\
-    " Ej. (?<=\\d\\d\\s).+(?=\\.flac)."
-parse_track_number = "Parses the 'tracknumber' from the actual file name." +\
-    " You must provide a valid regex expresion." +\
-    " Ej. \\d+(?=.+\\.mp3)."
-help_files_dir = "Note: overrides --file option"
-help_from_file = "Note: overrides --file and --files-directory"
+import consts as con
 
 _op_str_matchers = utilities.optional_string_matchers.OptionalStringMatchers()
 
 
 @click.command()
 @click.option('--file', type=str)
-@click.option('--files-directory', type=str, help=help_files_dir)
-@click.option('--from-file', type=str, help=help_from_file)
+@click.option('--files-directory', type=str, help=con.HELP_FILES_DIR)
+@click.option('--from-file', type=str, help=con.HELP_FROM_FILE)
 @click.option('--album', type=str)
 @click.option('--albumartist', type=str)
 @click.option('--artist', type=str)
@@ -67,10 +29,10 @@ _op_str_matchers = utilities.optional_string_matchers.OptionalStringMatchers()
 @click.option('--tracktitle', type=str)
 @click.option('--year', type=int)
 @click.option('--isrc', type=str)
-@click.option('--parse-title-capitalize', type=str, help=parse_cap_help)
-@click.option('--parse-title-as-is', type=str, help=parse_asis_help)
-@click.option('--parse-title-clean', type=str, help=parse_clean_help)
-@click.option('--parse-track-number', type=str, help=parse_track_number)
+@click.option('--parse-title-capitalize', type=str, help=con.PARSE_CAP_HELP)
+@click.option('--parse-title-as-is', type=str, help=con.PARSE_ASIS_HELP)
+@click.option('--parse-title-clean', type=str, help=con.PARSE_CLEAN_HELP)
+@click.option('--parse-track-number', type=str, help=con.PARSE_TRACK_NUMBER)
 def cli(file, files_directory, from_file, album, albumartist, artist, comment,
         compilation,
         composer, discnumber, genre, lyrics,
@@ -210,7 +172,7 @@ def parse_from_file(tags: dict,
                 tags[tmp[0]] = tmp[1].strip()
 
                 try:
-                    if tmp[0] in int_tags:
+                    if tmp[0] in con.INT_TAGS:
                         tags[tmp[0]] = int(tags[tmp[0]])
                 except Exception as e:
                     raise utilities.custom_exceptions.\
@@ -250,10 +212,10 @@ def validate_tags_types(**tags_to_set):
     Validates that each actual tag is of the expected type
     '''
     for tag in tags_to_set:
-        if tag in str_tags and not isinstance(tags_to_set[tag], str):
+        if tag in con.STR_TAGS and not isinstance(tags_to_set[tag], str):
             message = (f"'{tag}' is expected to be a sequence of characters.")
             raise utilities.custom_exceptions.UnexpectedTermination(message)
-        elif tag in int_tags and not isinstance(tags_to_set[tag], int):
+        elif tag in con.INT_TAGS and not isinstance(tags_to_set[tag], int):
             message = (f"'{tag}' is expected to be a sequence of numbers.")
             raise utilities.custom_exceptions.UnexpectedTermination(message)
 
@@ -363,12 +325,13 @@ def file_walker(files_directory: str, file: str) -> list:
     if files_directory:
         actual_files = list(
                         filter(
-                            lambda a: a.split(".")[-1] in valid_extensions,
+                            lambda a: a.split(".")[-1] in con.VALID_EXTENSIONS,
                             listdir(files_directory))
                         )
 
         for i in range(len(actual_files)):
-            actual_files[i] = files_directory + file_delimit + actual_files[i]
+            actual_files[i] = files_directory + con.FILE_DELIMIT +\
+             actual_files[i]
     # else just 1 file
     else:
         actual_files = [file]
