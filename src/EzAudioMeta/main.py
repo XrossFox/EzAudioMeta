@@ -124,15 +124,9 @@ def cli(file, files_directory, from_file, album, albumartist, artist, comment,
 
         actual_files = file_walker(files_directory, file)
 
-        tags_validation((parse_title_as_is
-                        or parse_title_capitalize
-                        or parse_title_clean),
-                        parse_track_number, **tags)
-
-        # remove empty tags
-        tags_to_set = actual_tags(**tags)
-
-        validate_tags_types(**tags_to_set)
+        tags_to_set = tag_validator(parse_title_as_is, parse_title_capitalize,
+                                    parse_title_clean, parse_track_number,
+                                    **tags)
 
         for a_file in actual_files:
 
@@ -264,7 +258,7 @@ def validate_tags_types(**tags_to_set):
             raise utilities.custom_exceptions.UnexpectedTermination(message)
 
 
-def actual_tags(**tags) -> dict:
+def remove_empty_tags(**tags) -> dict:
     '''
     Returns a dict of the actual tags that are not None.
     '''
@@ -275,8 +269,8 @@ def actual_tags(**tags) -> dict:
     return tags_to_set
 
 
-def tags_validation(parse_title_enabled: bool,
-                    parse_track_number: bool, **tags) -> None:
+def is_empty_or_has_parsers(parse_title_enabled: bool,
+                            parse_track_number: bool, **tags) -> None:
     '''
     Checks that there is at least 1 tag set, title parser is enabled or
     else terminates the process with 0.
@@ -380,6 +374,27 @@ def file_walker(files_directory: str, file: str) -> list:
         actual_files = [file]
 
     return actual_files
+
+
+def tag_validator(parse_title_as_is: bool,
+                  parse_title_capitalize: bool,
+                  parse_title_clean: bool,
+                  parse_track_number: bool,
+                  **tags) -> dict:
+    '''
+    Validates that there is at least 1 tag set, or that there is a title parser
+    enabled. Removes empty tags form dict, and validates that tags are of
+    of proper type. Returns the setted tags.
+    '''
+    is_empty_or_has_parsers((parse_title_as_is
+                             or parse_title_capitalize
+                             or parse_title_clean),
+                            parse_track_number, **tags)
+    clean_tags = remove_empty_tags(**tags)
+
+    validate_tags_types(**clean_tags)
+
+    return clean_tags
 
 
 if __name__ == "__main__":
