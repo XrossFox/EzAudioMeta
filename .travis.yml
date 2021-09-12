@@ -5,4 +5,5 @@ install:
   - pip install -r requirements.txt
 script:
   - cd src
+  - sudo apt-get install libmagic1
   - python -m unittest discover tests
