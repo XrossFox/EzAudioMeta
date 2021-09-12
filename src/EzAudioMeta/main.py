@@ -1,4 +1,5 @@
 from os import path, listdir
+from re import error
 
 import click
 import magic
@@ -90,39 +91,8 @@ def cli(file, files_directory, from_file, album, albumartist, artist, comment,
                                     parse_title_clean, parse_track_number,
                                     **tags)
 
-        for a_file in actual_files:
-
-            # If parse from title is set, then each time a track is received,
-            # the file name will be parsed to extract the track title and
-            # added to the tags to set dict. Since its called for all
-            # tracks, it will always update before setting the tags to file.
-            if parse_title_capitalize:
-                tags_to_set["tracktitle"] =\
-                    _op_str_matchers.\
-                    extract_track_title_capitalize(a_file,
-                                                   parse_title_capitalize)
-
-            if parse_title_as_is:
-                tags_to_set["tracktitle"] =\
-                    _op_str_matchers.\
-                    extract_track_title_as_is(a_file,
-                                              parse_title_as_is)
-
-            if parse_title_clean:
-                tags_to_set["tracktitle"] =\
-                    _op_str_matchers.\
-                    extract_track_title_cleanup_and_capitalize(
-                        a_file,
-                        parse_title_clean
-                    )
-
-            if parse_track_number:
-                tags_to_set["tracknumber"] =\
-                    _op_str_matchers.\
-                    extract_track_number(a_file,
-                                         parse_track_number)
-
-            base_audio_wrapper(a_file, **tags_to_set)
+        wrapper_loop(actual_files, tags_to_set, parse_title_capitalize,
+                     parse_title_as_is, parse_title_clean, parse_track_number)
 
     except utilities.custom_exceptions.ExpectedTermination as et:
         print(et)
@@ -295,7 +265,12 @@ def file_validation(file=None, files_directory=None, from_file=None) -> None:
 
 def base_audio_wrapper(file, **tags_to_set):
     '''
-    send and write tags to file
+    send and write tags to file.
+    - Raises NotImplementedError and UnexpectedTermination if error when
+    loading file.
+    - Raises TypeError and UnexpectedTermination if error in type of value in
+    tag.
+    - Raises Exception and UnexpectedTermination.
     '''
     try:
         audio_file = audio.base_audio.BaseAudio()
@@ -339,10 +314,10 @@ def file_walker(files_directory: str, file: str) -> list:
     return actual_files
 
 
-def tag_validator(parse_title_as_is: bool,
-                  parse_title_capitalize: bool,
-                  parse_title_clean: bool,
-                  parse_track_number: bool,
+def tag_validator(parse_title_as_is: str,
+                  parse_title_capitalize: str,
+                  parse_title_clean: str,
+                  parse_track_number: str,
                   **tags) -> dict:
     '''
     Validates that there is at least 1 tag set, or that there is a title parser
@@ -358,6 +333,90 @@ def tag_validator(parse_title_as_is: bool,
     validate_tags_types(**clean_tags)
 
     return clean_tags
+
+
+def wrapper_loop(actual_files: list,
+                 tags_to_set: dict,
+                 parse_title_capitalize: str,
+                 parse_title_as_is: str,
+                 parse_title_clean: str,
+                 parse_track_number: str
+                 ):
+    '''
+    Starts the process.
+    - Raises re.error amd ExpectedTermination if invalid regex.
+    - Raises ValueError if parse_track_number parses a non-int.
+    - Raises NotImplementedError and UnexpectedTermination if error when
+    loading file.
+    - Raises TypeError and UnexpectedTermination if error in type of value in
+    tag.
+    - Raises Exception and UnexpectedTermination.
+    '''
+    for a_file in actual_files:
+
+        # If parse from title is set, then each time a track is received,
+        # the file name will be parsed to extract the track title and
+        # added to the tags to set dict. Since its called for all
+        # tracks, it will always update before setting the tags to file.
+        if parse_title_capitalize:
+            try:
+                tags_to_set["tracktitle"] =\
+                    _op_str_matchers.\
+                    extract_track_title_capitalize(a_file,
+                                                   parse_title_capitalize)
+            except error as er:
+                raise utilities.custom_exceptions.ExpectedTermination(
+                    f"Invalid Regex: {parse_title_capitalize}") from er
+            except Exception as e:
+                raise utilities.custom_exceptions.\
+                    UnexpectedTermination() from e
+
+        if parse_title_as_is:
+            try:
+                tags_to_set["tracktitle"] =\
+                    _op_str_matchers.\
+                    extract_track_title_as_is(a_file,
+                                              parse_title_as_is)
+            except error as er:
+                raise utilities.custom_exceptions.ExpectedTermination(
+                    f"Invalid Regex: {parse_title_as_is}") from er
+            except Exception as e:
+                raise utilities.custom_exceptions.\
+                    UnexpectedTermination() from e
+
+        if parse_title_clean:
+            try:
+                tags_to_set["tracktitle"] =\
+                    _op_str_matchers.\
+                    extract_track_title_cleanup_and_capitalize(
+                        a_file,
+                        parse_title_clean
+                    )
+            except error as er:
+                raise utilities.custom_exceptions.ExpectedTermination(
+                    f"Invalid Regex: {parse_title_clean}") from er
+            except Exception as e:
+                raise utilities.custom_exceptions.\
+                    UnexpectedTermination() from e
+
+        if parse_track_number:
+            try:
+                tags_to_set["tracknumber"] =\
+                    _op_str_matchers.\
+                    extract_track_number(a_file,
+                                         parse_track_number)
+            except error as er:
+                raise utilities.custom_exceptions.ExpectedTermination(
+                    f"Invalid Regex: {parse_track_number}") from er
+            except TypeError as te:
+                raise utilities.custom_exceptions.UnexpectedTermination(
+                    "Tried to parse a string of characters for 'tracktitle'"
+                ) from te
+            except Exception as e:
+                raise utilities.custom_exceptions.\
+                    UnexpectedTermination() from e
+
+        base_audio_wrapper(a_file, **tags_to_set)
 
 
 if __name__ == "__main__":

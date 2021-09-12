@@ -368,6 +368,27 @@ class TestCli(unittest.TestCase):
         audio.load_track(audio_file)
         self.assertEqual(audio.get_tag("tracktitle"), expected)
 
+    def test_extract_title_title_capitalize_invalid_regex(self) -> None:
+        '''
+        When passing an invalid regex expression to extract and capitalize the
+        track title from the actual audio file,
+        1. Pass a valid audio file.
+        2. Pass an invalid regex expression.
+        3. Raise ExpectedTermination.
+        '''
+        runner = CliRunner()
+        audio_file = self.path_to_test_files + self.file_delimit +\
+            CONS.AUDIO_FILE_3
+
+        pattern = "["
+
+        result = runner.invoke(cli, ["--file", audio_file,
+                                     "--parse-title-capitalize", pattern]
+                               )
+        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(result.output, f"Invalid Regex: {pattern}" +
+                         "\nNow exiting\n")
+
     def test_extract_title_title_as_is(self) -> None:
         '''
         When passing a regex expression to extract as is the
@@ -392,6 +413,27 @@ class TestCli(unittest.TestCase):
         audio = BaseAudio()
         audio.load_track(audio_file)
         self.assertEqual(audio.get_tag("tracktitle"), expected)
+
+    def test_extract_title_title_as_is_invalid_regex(self) -> None:
+        '''
+        When passing an invalid regex expression to extract as is the
+        track title from the actual audio file,
+        1. Pass a valid audio file.
+        2. Pass an invalid regex expression.
+        3. Raise ExpectedTermination.
+        '''
+        runner = CliRunner()
+        audio_file = self.path_to_test_files + self.file_delimit +\
+            CONS.AUDIO_FILE_3
+
+        pattern = "["
+
+        result = runner.invoke(cli, ["--file", audio_file,
+                                     "--parse-title-as-is", pattern]
+                               )
+        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(result.output, f"Invalid Regex: {pattern}" +
+                         "\nNow exiting\n")
 
     def test_extract_title_cleanup_and_capitalize(self) -> None:
         '''
@@ -418,6 +460,27 @@ class TestCli(unittest.TestCase):
         audio = BaseAudio()
         audio.load_track(audio_file)
         self.assertEqual(audio.get_tag("tracktitle"), expected)
+
+    def test_extract_title_cleanup_and_capitalize_invalid_regex(self) -> None:
+        '''
+        When passing an invalid regex expression to extract, cleanup and
+        Capitalize track title from the actual audio file,
+        1. Pass a valid audio file.
+        2. Pass an invalid regex expression.
+        3. Raise ExpectedTermination.
+        '''
+        runner = CliRunner()
+        audio_file = self.path_to_test_files + self.file_delimit +\
+            CONS.AUDIO_FILE_3
+
+        pattern = "["
+
+        result = runner.invoke(cli, ["--file", audio_file,
+                                     "--parse-title-clean", pattern]
+                               )
+        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(result.output, f"Invalid Regex: {pattern}" +
+                         "\nNow exiting\n")
 
     def test_regex_from_file_capitalize(self) -> None:
         '''

@@ -1,4 +1,5 @@
 import unittest
+from re import error
 from EzAudioMeta.utilities.optional_string_matchers import\
     OptionalStringMatchers
 
@@ -18,8 +19,19 @@ class TestOptionalStringMatchers(unittest.TestCase):
         track_title = osm.extract_track_title_as_is(file_name, pattern)
         self.assertEqual(expected, track_title)
 
+    def test_extract_as_is_invalid_regex(self) -> None:
+        '''
+        1. Given an audio file name.
+        2. And given an invalid regex expression.
+        3. Raise re.error.
+        '''
+        osm = OptionalStringMatchers()
+        file_name = "03 Of Lillies And Remains.flac"
+        pattern = "["
+        with self.assertRaises(error):
+            osm.extract_track_title_as_is(file_name, pattern)
+
     def test_extract_track_title_title_case_1(self) -> None:
-        pass
         '''
         1. Given an audio file name with a weird mix of case alternation.
         2. And given a Regex expression.
@@ -38,7 +50,6 @@ class TestOptionalStringMatchers(unittest.TestCase):
         self.assertEqual(expected, track_title)
 
     def test_extract_track_title_title_case_2(self) -> None:
-        pass
         '''
         1. Given an audio file name with a weird mix of case alternation.
         2. And given a Regex expression.
@@ -57,7 +68,6 @@ class TestOptionalStringMatchers(unittest.TestCase):
         self.assertEqual(expected, track_title)
 
     def test_extract_track_title_title_case_3(self) -> None:
-        pass
         '''
         1. Given an audio file name with a weird mix of case alternation.
         2. And given a Regex expression.
@@ -74,6 +84,21 @@ class TestOptionalStringMatchers(unittest.TestCase):
                                                          pattern)
 
         self.assertEqual(expected, track_title)
+
+    def test_extract_track_title_title_case_invalid_regex(self) -> None:
+        '''
+        1. Given an audio file name.
+        2. And given an invalid Regex expression.
+        3. Raise re.error
+        '''
+        osm = OptionalStringMatchers()
+
+        file_name = "03 Of lILLIes AND remains.flac"
+        pattern = "["
+
+        with self.assertRaises(error):
+            osm.extract_track_title_capitalize(file_name,
+                                               pattern)
 
     def test_extract_track_title_as_is_1(self) -> None:
         '''
@@ -107,6 +132,19 @@ class TestOptionalStringMatchers(unittest.TestCase):
 
         self.assertEqual(expected, title)
 
+    def test_extract_title_cleanup_and_capitalize_invalid_regex(self) -> None:
+        '''
+        1. Given an audio file name-
+        2. And given an invvalid Regex expression.
+        3. Raise re.error.
+        '''
+        osm = OptionalStringMatchers()
+        file_name = "01 my-name_is  tony--mon__tana.flac"
+        pattern = "["
+        with self.assertRaises(error):
+            osm.extract_track_title_cleanup_and_capitalize(file_name,
+                                                           pattern)
+
     def test_extract_track_number(self) -> None:
         '''
         1. Given an audio file name.
@@ -133,3 +171,27 @@ class TestOptionalStringMatchers(unittest.TestCase):
         pattern = "\\d+(?=.*\\.mp3)"
         track_number = osm.extract_track_number(file_name, pattern)
         self.assertEqual(track_number, expected)
+
+    def test_extract_track_number_invalid_regex(self) -> None:
+        '''
+        1. Given an audio file name with no number.
+        2. And an invalid Regex expression.
+        3. Raises re.error.
+        '''
+        osm = OptionalStringMatchers()
+        file_name = "no number track title.mp3"
+        pattern = "["
+        with self.assertRaises(error):
+            osm.extract_track_number(file_name, pattern)
+
+    def test_extract_track_number_no_int_regex(self) -> None:
+        '''
+        1. Given an audio file name with no number.
+        2. And a valid Regex expression to search for a str.
+        3. Raise ValueError.
+        '''
+        osm = OptionalStringMatchers()
+        file_name = "no number track title.mp3"
+        pattern = "mp3"
+        with self.assertRaises(ValueError):
+            osm.extract_track_number(file_name, pattern)

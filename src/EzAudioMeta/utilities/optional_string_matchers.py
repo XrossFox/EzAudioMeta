@@ -1,6 +1,5 @@
 from re import search
 from re import sub
-from re import error
 
 
 class OptionalStringMatchers:
@@ -42,8 +41,10 @@ class OptionalStringMatchers:
         '''
         Receives the name of the track and returns the substring that
         matches the regex expression as is, no further processing is done.
+        Raises re.error if invalid regex is found.
         '''
         title = search(pattern, file_name).group(0)
+
         title = title.strip()
         return title
 
@@ -54,7 +55,7 @@ class OptionalStringMatchers:
         matches the regex expression and the it is capitalized following the
         Title Capitalization rules. Words not capitalized are: articles,
         coordinate junctions and proposotions that are less than 5 letters
-        long.
+        long. Raises re.error if invalid regex is found.
         '''
         track_title = search(pattern, file_name).group(0)
         list_words = track_title.split(" ")
@@ -110,7 +111,8 @@ class OptionalStringMatchers:
         '''
         Receives a string, replaces all '-' and '_', trailing or duplicate
         white spaces for single white spaces, and trims leading and trainling
-        spaces. Then applies regular title capitalization.
+        spaces. Then applies regular title capitalization. Raises re.error
+        if invalid regex.
         '''
         pattern_remover = "(_+|-+| {2,})"
         clean_string = sub(pattern_remover, " ", file_name)
@@ -126,19 +128,11 @@ class OptionalStringMatchers:
         If no valid match is found, returns 0.
         -----
         Raises an re.error if an invalid regex is received\n
-        Raises a TypeError if tha matching object cannot be parsed to int.\n
+        Raises a ValueError if tha matching object cannot be parsed to int.\n
         Raises an Exception if something else happens.
         '''
         track_number = 0
-        try:
-            match = search(pattern, file_name)
-        except error as e:
-            print("Error in regex:" + pattern + ":" + e.msg)
-            exit(1)
+        match = search(pattern, file_name)
         if match:
-            try:
-                track_number = int(match.group(0))
-            except ValueError as e:
-                print("Not a number: " + str(e))
-                exit(1)
+            track_number = int(match.group(0))
         return track_number
