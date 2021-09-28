@@ -1,7 +1,6 @@
 import unittest
 from pathlib import Path
 from pathlib import PurePath
-from sys import platform
 from random import randrange
 from click.testing import CliRunner
 from tests.context import BaseAudio
@@ -13,13 +12,8 @@ class TestCli(unittest.TestCase):
 
     def setUp(self) -> None:
         self.current_directory = str(Path(__file__).parent.absolute())
-        if platform.startswith("win32"):
-            self.file_delimit = "\\"
-        elif platform.startswith("linux"):
-            self.file_delimit = "/"
-        self.path_to_test_files = \
-            str(self.current_directory) + self.file_delimit +\
-            CONS.TEST_FILES_DIR
+        self.path_to_test_files = str(PurePath(self.current_directory,
+                                               CONS.TEST_FILES_DIR))
 
         self.reset_default_tags()
 
@@ -63,8 +57,8 @@ class TestCli(unittest.TestCase):
         2. Error code 1 expected.
         3. Message: "Your File does not actually exists :c"
         '''
-        audio_directory = \
-            self.path_to_test_files + self.file_delimit + "Rumba Generica.mp3"
+        audio_directory = str(PurePath(self.path_to_test_files,
+                                       "Rumba Generica.mp3"))
 
         runner = CliRunner()
         new_title = "Perreando con Lucifer"
@@ -100,8 +94,8 @@ class TestCli(unittest.TestCase):
         2. Error code 0 expected.
         3. Message: "No tags specified.\n#
         '''
-        audio_file = \
-            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_1
+        audio_file = str(PurePath(self.path_to_test_files,
+                                  CONS.AUDIO_FILE_1))
         runner = CliRunner()
         result = runner.invoke(cli, ["--file", audio_file])
         self.assertEqual(result.exit_code, 0)
@@ -114,8 +108,8 @@ class TestCli(unittest.TestCase):
         2. set the 'tracktitle' tag.
         3. check for changes.
         '''
-        audio_file = \
-            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_1
+        audio_file = str(PurePath(self.path_to_test_files,
+                                  CONS.AUDIO_FILE_1))
         runner = CliRunner()
         new_title = "Perreando con Lucifer"
         result = runner.invoke(cli, ["--file", audio_file,
@@ -133,8 +127,8 @@ class TestCli(unittest.TestCase):
         2. set the 'tracktitle', 'album', and 'genre' tags.
         3. check for changes.
         '''
-        audio_file = \
-            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_1
+        audio_file = audio_file = str(PurePath(self.path_to_test_files,
+                                               CONS.AUDIO_FILE_1))
         runner = CliRunner()
         new_title = "Perreando con Lucifer"
         new_album = "Satanas se Fue de Rumba"
@@ -150,8 +144,8 @@ class TestCli(unittest.TestCase):
         self.assertEqual(ba_audio.get_tag("tracktitle"), new_title)
         self.assertEqual(ba_audio.get_tag("album"), new_album)
         self.assertEqual(ba_audio.get_tag("genre"), new_genre)
-        audio_file = \
-            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_1
+        audio_file = audio_file = str(PurePath(self.path_to_test_files,
+                                               CONS.AUDIO_FILE_1))
         runner = CliRunner()
         new_title = "Perreando con Lucifer"
         result = runner.invoke(cli, ["--file", audio_file,
@@ -166,8 +160,8 @@ class TestCli(unittest.TestCase):
         3. the cli should throw a message: '<option-name> expected to be
         str'
         '''
-        audio_file = \
-            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_1
+        audio_file = str(PurePath(self.path_to_test_files,
+                                  CONS.AUDIO_FILE_1))
         runner = CliRunner()
         new_title = 15
         result = runner.invoke(cli, ["--file", audio_file,
@@ -187,10 +181,10 @@ class TestCli(unittest.TestCase):
         '''
 
         audio_files_path = self.path_to_test_files
-        audio_file_1 = \
-            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_1
-        audio_file_2 = \
-            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_2
+        audio_file_1 = str(PurePath(self.path_to_test_files,
+                                    CONS.AUDIO_FILE_1))
+        audio_file_2 = str(PurePath(self.path_to_test_files,
+                                    CONS.AUDIO_FILE_2))
         new_artist = "Lucifer"
 
         runner = CliRunner()
@@ -221,8 +215,7 @@ class TestCli(unittest.TestCase):
             "artist": "Los Luciferinos",
             "album": "Rumbeando en el Noveno Infierno",
             "tracktitle": "El Perreo de Lilith",
-            "file": self.path_to_test_files + self.file_delimit +
-            CONS.AUDIO_FILE_1,
+            "file": str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_1)),
             "year": 1984
         }
 
@@ -276,9 +269,8 @@ class TestCli(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
 
         audio = BaseAudio()
-        audio.load_track(tags_and_values["files-directory"] +
-                         self.file_delimit +
-                         CONS.AUDIO_FILE_1)
+        audio.load_track(str(PurePath(tags_and_values["files-directory"],
+                                      CONS.AUDIO_FILE_1)))
 
         for key in tags_and_values:
 
@@ -287,9 +279,8 @@ class TestCli(unittest.TestCase):
 
             self.assertEqual(audio.get_tag(key), tags_and_values[key])
 
-        audio.load_track(tags_and_values["files-directory"] +
-                         self.file_delimit +
-                         CONS.AUDIO_FILE_2)
+        audio.load_track(str(PurePath(tags_and_values["files-directory"],
+                                      CONS.AUDIO_FILE_2)))
 
         for key in tags_and_values:
 
@@ -352,10 +343,9 @@ class TestCli(unittest.TestCase):
         3. The tracktitle tag should be names accordingly.
         '''
         runner = CliRunner()
-        audio_file = self.path_to_test_files + self.file_delimit +\
-            CONS.AUDIO_FILE_3
+        audio_file = str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_3))
 
-        pattern = "(?<=\\d\\d).+(?=.mp3)"
+        pattern = CONS.REGEX_PATTERN
 
         result = runner.invoke(cli, ["--file", audio_file,
                                      "--parse-title-capitalize", pattern]
@@ -377,10 +367,9 @@ class TestCli(unittest.TestCase):
         3. Raise ExpectedTermination.
         '''
         runner = CliRunner()
-        audio_file = self.path_to_test_files + self.file_delimit +\
-            CONS.AUDIO_FILE_3
+        audio_file = str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_3))
 
-        pattern = "["
+        pattern = CONS.INVALID_REGEX
 
         result = runner.invoke(cli, ["--file", audio_file,
                                      "--parse-title-capitalize", pattern]
@@ -398,10 +387,9 @@ class TestCli(unittest.TestCase):
         3. The tracktitle tag should be named as it appears in title.
         '''
         runner = CliRunner()
-        audio_file = self.path_to_test_files + self.file_delimit +\
-            CONS.AUDIO_FILE_3
+        audio_file = str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_3))
 
-        pattern = "(?<=\\d\\d).+(?=.mp3)"
+        pattern = CONS.REGEX_PATTERN
 
         result = runner.invoke(cli, ["--file", audio_file,
                                      "--parse-title-as-is", pattern]
@@ -423,10 +411,9 @@ class TestCli(unittest.TestCase):
         3. Raise ExpectedTermination.
         '''
         runner = CliRunner()
-        audio_file = self.path_to_test_files + self.file_delimit +\
-            CONS.AUDIO_FILE_3
+        audio_file = str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_3))
 
-        pattern = "["
+        pattern = CONS.INVALID_REGEX
 
         result = runner.invoke(cli, ["--file", audio_file,
                                      "--parse-title-as-is", pattern]
@@ -445,10 +432,9 @@ class TestCli(unittest.TestCase):
         white spaces.
         '''
         runner = CliRunner()
-        audio_file = self.path_to_test_files + self.file_delimit +\
-            CONS.AUDIO_FILE_3
+        audio_file = str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_3))
 
-        pattern = "(?<=\\d\\d).+(?=.mp3)"
+        pattern = CONS.REGEX_PATTERN
 
         result = runner.invoke(cli, ["--file", audio_file,
                                      "--parse-title-clean", pattern]
@@ -470,10 +456,9 @@ class TestCli(unittest.TestCase):
         3. Raise ExpectedTermination.
         '''
         runner = CliRunner()
-        audio_file = self.path_to_test_files + self.file_delimit +\
-            CONS.AUDIO_FILE_3
+        audio_file = str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_3))
 
-        pattern = "["
+        pattern = CONS.INVALID_REGEX
 
         result = runner.invoke(cli, ["--file", audio_file,
                                      "--parse-title-clean", pattern]
@@ -490,9 +475,8 @@ class TestCli(unittest.TestCase):
         2. Pass a valid regex expression.
         3. The tracktitle tag should be names accordingly.
         '''
-        pattern = "(?<=\\d\\d).+(?=.mp3)"
-        audio_file = self.path_to_test_files + self.file_delimit +\
-            CONS.AUDIO_FILE_3
+        pattern = CONS.REGEX_PATTERN
+        audio_file = str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_3))
         tags_and_values = {
             "parse-title-capitalize": pattern,
             "file": audio_file,
@@ -512,6 +496,19 @@ class TestCli(unittest.TestCase):
         audio.load_track(audio_file)
         self.assertEqual(audio.get_tag("tracktitle"), expected)
 
+    def test_regex_from_dir_capitalize(self) -> None:
+        '''
+        When passing a regex expression to extract and capitalize the
+        track title from the actual audio files using --files-directory option.
+        1. Pass a valid directory with audio files.
+        2. Pass a valid regex expression,
+        3. The tracktitle tag should be named accordingly.
+        '''
+        # TODO
+        pattern = CONS.REGEX_PATTERN
+        dir_path = CONS.TEST_FILES_DIR
+        pass
+
     def test_regex_from_file_as_is(self) -> None:
         '''
         When passing a regex expression to extract as is the
@@ -520,9 +517,8 @@ class TestCli(unittest.TestCase):
         2. Pass a valid regex expression.
         3. The tracktitle tag should be names accordingly.
         '''
-        pattern = "(?<=\\d\\d).+(?=.mp3)"
-        audio_file = self.path_to_test_files + self.file_delimit +\
-            CONS.AUDIO_FILE_3
+        pattern = CONS.REGEX_PATTERN
+        audio_file = str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_3))
         tags_and_values = {
             "parse-title-as-is": pattern,
             "file": audio_file,
@@ -550,9 +546,8 @@ class TestCli(unittest.TestCase):
         2. Pass a valid regex expression.
         3. The tracktitle tag should be names accordingly.
         '''
-        pattern = "(?<=\\d\\d).+(?=.mp3)"
-        audio_file = self.path_to_test_files + self.file_delimit +\
-            CONS.AUDIO_FILE_3
+        pattern = CONS.REGEX_PATTERN
+        audio_file = str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_3))
         tags_and_values = {
             "parse-title-clean": pattern,
             "file": audio_file,
@@ -579,11 +574,8 @@ class TestCli(unittest.TestCase):
         2. and a valid regex pattern.
         3. Extract the track number as a number type.
         '''
-        pattern = "\\d+(?=.+\\.mp3)"
-        audio_file =\
-            self.path_to_test_files +\
-            self.file_delimit +\
-            CONS.AUDIO_FILE_3
+        pattern = CONS.REGEX_FOR_NUMBER
+        audio_file = str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_3))
         expected = 1
         runner = CliRunner()
         result = runner.invoke(cli, ["--file", audio_file,
@@ -601,22 +593,13 @@ class TestCli(unittest.TestCase):
         2. and a valid regex pattern.
         3. Extract the track number as a number type.
         '''
-        pattern = "(?<=_)\\d+(?=\\.mp3)"
+        pattern = CONS.REGEX_FOR_TRACK
 
         # directory and individual files
         audio_directory = self.path_to_test_files
-        first_f =\
-            self.path_to_test_files +\
-            self.file_delimit +\
-            CONS.AUDIO_FILE_3
-        second_f =\
-            self.path_to_test_files +\
-            self.file_delimit +\
-            CONS.AUDIO_FILE_1
-        third_f =\
-            self.path_to_test_files +\
-            self.file_delimit +\
-            CONS.AUDIO_FILE_2
+        first_f = str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_3))
+        second_f = str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_1))
+        third_f = str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_2))
 
         # expected track numbers
         expected1 = 3
@@ -648,11 +631,8 @@ class TestCli(unittest.TestCase):
         2. and a valid regex pattern.
         3. Extract the track number as 0 number type.
         '''
-        pattern = "\\d+(?=.+\\.mp3)"
-        audio_file =\
-            self.path_to_test_files +\
-            self.file_delimit +\
-            CONS.AUDIO_FILE_1
+        pattern = CONS.REGEX_FOR_NUMBER
+        audio_file = str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_1))
         expected = 0
         runner = CliRunner()
         result = runner.invoke(cli, ["--parse-track-number", pattern,
@@ -670,11 +650,8 @@ class TestCli(unittest.TestCase):
         2. and a valid regex pattern.
         3. Extract the track number as a number type.
         '''
-        pattern = "\\d+(?=.+\\.mp3)"
-        audio_file =\
-            self.path_to_test_files +\
-            self.file_delimit +\
-            CONS.AUDIO_FILE_3
+        pattern = CONS.REGEX_FOR_NUMBER
+        audio_file = str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_3))
         expected = 1
         tags_and_values = {
             "parse-track_number": pattern,
@@ -698,22 +675,13 @@ class TestCli(unittest.TestCase):
         2. and a valid regex pattern.
         3. Extract the track number as a number type.
         '''
-        pattern = "(?<=_)\\d+(?=\\.mp3)"
+        pattern = CONS.REGEX_FOR_TRACK
 
         # directory and individual files
         audio_directory = self.path_to_test_files
-        first_f =\
-            self.path_to_test_files +\
-            self.file_delimit +\
-            CONS.AUDIO_FILE_3
-        second_f =\
-            self.path_to_test_files +\
-            self.file_delimit +\
-            CONS.AUDIO_FILE_1
-        third_f =\
-            self.path_to_test_files +\
-            self.file_delimit +\
-            CONS.AUDIO_FILE_2
+        first_f = str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_3))
+        second_f = str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_1))
+        third_f = str(PurePath(self.path_to_test_files, CONS.AUDIO_FILE_2))
 
         # expected track numbers
         expected1 = 3
@@ -768,9 +736,9 @@ class TestCli(unittest.TestCase):
         test_text_file_<random_number>.txt\n
         The random number is between 1 and 10,000.
         """
-        test_file_path = self.path_to_test_files + self.file_delimit + \
-            "test_text_file_" + \
-            str(randrange(1, 10000)) + ".txt"
+        ran = str(randrange(1, 10000))
+        test_file_path = str(PurePath(self.path_to_test_files,
+                                      f"test_text_file_{ran}.txt"))
 
         with open(test_file_path, mode="w") as test_file:
             test_file.writelines(lines_to_write)
@@ -778,8 +746,8 @@ class TestCli(unittest.TestCase):
         return test_file_path
 
     def reset_default_tags(self) -> None:
-        audio_file = \
-            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_1
+        audio_file = str(PurePath(self.path_to_test_files,
+                                  CONS.AUDIO_FILE_1))
         ba_audio = BaseAudio()
         ba_audio.load_track(audio_file)
         ba_audio.set_tag("artist", "Dee Yan-Key")
@@ -790,8 +758,8 @@ class TestCli(unittest.TestCase):
         ba_audio.set_tag("title", "gloomy sky")
         ba_audio.write_tags()
 
-        audio_file = \
-            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_2
+        audio_file = str(PurePath(self.path_to_test_files,
+                                  CONS.AUDIO_FILE_2))
         ba_audio = BaseAudio()
         ba_audio.load_track(audio_file)
         ba_audio.set_tag("artist", "Siddhartha Corsus")
@@ -800,8 +768,8 @@ class TestCli(unittest.TestCase):
         ba_audio.set_tag("title",
                          "Let Go of Time (and Time Will Let Go of You)")
 
-        audio_file = \
-            self.path_to_test_files + self.file_delimit + CONS.AUDIO_FILE_3
+        audio_file = str(PurePath(self.path_to_test_files,
+                                  CONS.AUDIO_FILE_3))
         ba_audio = BaseAudio()
         ba_audio.load_track(audio_file)
         ba_audio.set_tag("artist", "Unknown")
